@@ -1,0 +1,15 @@
+menuPrincipal()
+│
+├── menuVehiculos()
+│     ├── registrarVehiculo()
+│     ├── consultarVehiculo()
+│     ├── actualizarEstadoVehiculo()
+│     ├── generarFichaVehiculoPDF()
+│
+├── menuConductores()
+│     ├── registrarConductor()
+│     ├── consultarConductor()
+│     ├── actualizarConductor()
+│
+└── menuMantenimientos()
+      └── registrarMantenimiento()
