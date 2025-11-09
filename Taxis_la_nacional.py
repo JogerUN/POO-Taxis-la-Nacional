@@ -42,36 +42,49 @@ def crearTablaVehiculos(connection):
     connection.commit()
 
 #Se encarga de rectificar y evitar valores de entrada "inputs" vacios 
-def inputObligatorio(entrada):
-    while True:
-        #metodo .strip() para eliminar espacios en blanco de los extremos de la cadena
-        entrada = input(entrada).strip()
-        if entrada == "":
-            print("⚠️ Lo sentimos el campo no puede estar vacio, porfavor intente de nuevo.")
-        else:
-            return entrada
+def inputObligatorio(mensaje):
+    #metodo .strip() para eliminar espacios en blanco de los extremos de la cadena
+    entrada = input(mensaje).strip()
+    if entrada == "":
+        print(" ⚠️ Lo sentimos el campo no puede estar vacio, porfavor intente de nuevo.")
+        print("Regresando al menu anterior...")
+        return None
+    else:
+        return entrada
         
-#Fuc. que permite egistrar nuevos vehiculos 
+#Fuc. que permite registrar nuevos vehiculos 
 def registrarVehiculo(connection):
     print("\n--- REGISTRAR NUEVO VEHÍCULO ---")
     
-    datos = (
-        inputObligatorio("Placa: "), 
-        inputObligatorio("Marca: "),
-        inputObligatorio("Referencia: "),
-        inputObligatorio("Modelo: "),
-        inputObligatorio("Número de chasis: "),
-        inputObligatorio("Número de motor: "),
-        inputObligatorio("Color: "),
-        inputObligatorio("Concesionario: "),
-        inputObligatorio("Fecha de compra (DD/MM/AAAA): "),
-        inputObligatorio("Garantía (meses): "),
-        inputObligatorio("Fecha compra poliza de seguro (DD/MM/AAAA): "),
-        inputObligatorio("Proveedor poliza de seguro: "),
-        inputObligatorio("Fecha compra seguro obligatorio (DD/MM/AAAA): "),
-        inputObligatorio("Proveedor seguro obligatorio: "),
-        inputObligatorio("Activo (1=Sí / 2=No): ")
-    )
+    campos = [
+        "Placa: ", 
+        "Marca: ",
+        "Referencia: ",
+        "Modelo: ",
+        "Número de chasis: ",
+        "Número de motor: ",
+        "Color: ",
+        "Concesionario: ",
+        "Fecha de compra (DD/MM/AAAA): ",
+        "Garantía (meses): ",
+        "Fecha compra poliza de seguro (DD/MM/AAAA): ",
+        "Proveedor poliza de seguro: ",
+        "Fecha compra seguro obligatorio (DD/MM/AAAA): ",
+        "Proveedor seguro obligatorio: ",
+        "Activo (1=Sí / 2=No): "
+    ]
+    
+    datos=[] #Lista temporal para guardar valores ingresados
+    
+    #Verifica que se ingresen dator de lo contrario retorna al menu anterior
+    for campo in campos:
+        entrada = inputObligatorio(campo)
+        if entrada is None:
+            print("❌ Registro cancelado. No se guardaron datos.")
+            return
+        datos.append(entrada) #Une cada dato a la lista datos=[] 
+
+    datos = tuple(datos) #convertimos la lista en tupla 
     
 #Evita ingresar un vehiculo que ya se encuentre registradio por medio de la  PRIMARY KEY "placa"
     try:
@@ -108,6 +121,7 @@ def consultarVehiculo(connection):
     else:
         print("⚠️ No se encontró ningún vehículo con esa placa.")
 
+#Permite actualizar el estado los vehiculos 
 def actualizarEstadoVehiculo(connection):
     placa = input("\nPlaca del vehículo a actualizar: ")
     cursor = connection.cursor()
