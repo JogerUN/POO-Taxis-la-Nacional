@@ -1,5 +1,7 @@
 import sqlite3
 from sqlite3 import Error
+
+#permite crear archivos PDF desde Python.
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from datetime import datetime
@@ -117,7 +119,7 @@ def actualizarPolizaVehiculo(connection):
     formatoFechas = "%d/%m/%Y"
 
     try:
-        with connection:  # 🔥 This ensures atomic transaction management
+        with connection:  # This ensures atomic transaction management
             cursor = connection.cursor()
 
             # Get current data
@@ -155,7 +157,7 @@ def actualizarPolizaVehiculo(connection):
             else:
                 print("\n⚠️ La nueva fecha del SOAT no puede ser anterior a la actual.")
 
-            # 🔒 `with connection:` auto-commits here safely
+            # `with connection:` auto-commits here safely
 
     except sqlite3.OperationalError as e:
         print(f"\n❌ Error de base de datos: {e}")
@@ -202,7 +204,7 @@ def crearTablaConductores(connection):
             )'''
     cursorObj.execute(cad)
     connection.commit()
-    print("Tabla 'conductores' creada correctamente.")
+    print("✅Tabla 'conductores' creada correctamente.")
 
 
 def registrarConductor(connection):
@@ -230,9 +232,9 @@ def registrarConductor(connection):
         cursor = connection.cursor()
         cursor.execute('''INSERT INTO conductores VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)''', datos)
         connection.commit()
-        print("Conductor registrado correctamente.")
+        print("✅ Conductor registrado correctamente.")
     except Error as e:
-        print("Error al registrar conductor:", e)
+        print("❌ Error al registrar conductor:", e)
 
 
 def actualizarConductor(connection):
@@ -245,10 +247,10 @@ def actualizarConductor(connection):
 
     # Si no se encuentra el conductor, avisar y salir
     if not fila:
-        print("No se encontró el conductor.")
+        print("⚠️ No se encontró el conductor.")
         return
 
-    # Mostrar los datos actuales
+    # Mostrar los datos actuales para poder validar que se quiere actualizar
     print(f"\nDatos actuales del conductor {fila[1]}:")
     print(f"Dirección actual: {fila[2]}")
     print(f"Teléfono actual: {fila[3]}")
@@ -258,7 +260,7 @@ def actualizarConductor(connection):
     print(f"Valor adeudado actual: {fila[12]}")
     print(f"Total ahorrado no devuelto actual: {fila[13]}\n")
 
-    # Pedir nuevos valores, permitiendo dejar en blanco
+    # Pedir nuevos valores, permitiendo dejar en blanco paa lo que no se quiere cambiar
     direccion = input("Nueva dirección (Enter para mantener actual): ") or fila[2]
     telefono = input("Nuevo teléfono (Enter para mantener actual): ") or fila[3]
     correo = input("Nuevo correo electrónico (Enter para mantener actual): ") or fila[4]
@@ -276,9 +278,9 @@ def actualizarConductor(connection):
                        (direccion, telefono, correo, fechaIngreso, fechaRetiro,
                         valorAdeuda, totalNoDevuelto, noId))
         connection.commit()
-        print("Información actualizada correctamente.")
+        print("✅ Información actualizada correctamente.")
     except Error as e:
-        print("Error al actualizar:", e)
+        print("❌ Error al actualizar:", e)
 
 def consultarConductor(connection):
     print("\n--- CONSULTAR CONDUCTOR ---")
@@ -288,7 +290,7 @@ def consultarConductor(connection):
     fila = cursor.fetchone()
 
     if not fila:
-        print("No se encontró información del conductor.")
+        print("❌ No se encontró información del conductor.")
         return
 
     estado = { '1': 'Activo', '2': 'Inactivo', '3': 'Despedido' }.get(str(fila[8]), 'Desconocido')
