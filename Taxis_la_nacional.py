@@ -46,7 +46,7 @@ def inputObligatorio(mensaje):
     #metodo .strip() para eliminar espacios en blanco de los extremos de la cadena
     entrada = input(mensaje).strip()
     if entrada == "":
-        print(" ⚠️ Lo sentimos el campo no puede estar vacio, porfavor intente de nuevo.")
+        print("⚠️ Lo sentimos el campo no puede estar vacio, porfavor intente de nuevo.")
         print("Regresando al menu anterior...")
         return None
     else:
@@ -239,6 +239,7 @@ def crearTablaConductores(connection):
             )'''
     cursorObj.execute(cad)
     connection.commit()
+    print("Tabla 'conductores' creada correctamente.")
 
 
 def registrarConductor(connection):
@@ -248,10 +249,10 @@ def registrarConductor(connection):
     direccion = input("Dirección: ")
     telefono = input("Teléfono: ")
     correo = input("Correo electrónico: ")
-    placaVehiculo = input("Placa del vehículo asignado: ")1
+    placaVehiculo = input("Placa del vehículo asignado: ")
     fechaIngreso = input("Fecha de ingreso (DD/MM/AAAA o vacío si no aplica): ")
     fechaRetiro = input("Fecha de retiro (DD/MM/AAAA o vacío si no aplica): ")
-    indicadorContratado = input("Estado (1=Activo / 2=Candidato / 3=Despedido): ")
+    indicadorContratado = input("Estado (1=Activo / 2=Inactivo / 3=Despedido): ")
     turno = input("Turno (1=24 horas / 2=12 horas): ")
     valorTurno = input("Valor del turno: ")
     valorAhorro = input("Valor ahorro mensual: ")
@@ -266,9 +267,9 @@ def registrarConductor(connection):
         cursor = connection.cursor()
         cursor.execute('''INSERT INTO conductores VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)''', datos)
         connection.commit()
-        print("✅ Conductor registrado correctamente.")
+        print("Conductor registrado correctamente.")
     except Error as e:
-        print("❌ Error al registrar conductor:", e)
+        print("Error al registrar conductor:", e)
 
 
 def actualizarConductor(connection):
@@ -281,7 +282,7 @@ def actualizarConductor(connection):
 
     # Si no se encuentra el conductor, avisar y salir
     if not fila:
-        print("❌ No se encontró el conductor.")
+        print("No se encontró el conductor.")
         return
 
     # Mostrar los datos actuales
@@ -302,7 +303,7 @@ def actualizarConductor(connection):
     fechaRetiro = input("Nueva fecha de retiro (Enter para mantener actual): ") or fila[7]
     valorAdeuda = input("Nuevo valor adeudado (Enter para mantener actual): ") or fila[12]
     totalNoDevuelto = input("Nuevo total ahorrado no devuelto (Enter para mantener actual): ") or fila[13]
-    
+
     try:
         cursor.execute('''UPDATE conductores SET 
                             direccion=?, telefono=?, correoElectronico=?, 
@@ -312,9 +313,9 @@ def actualizarConductor(connection):
                        (direccion, telefono, correo, fechaIngreso, fechaRetiro,
                         valorAdeuda, totalNoDevuelto, noId))
         connection.commit()
-        print("✅ Información actualizada correctamente.")
+        print("Información actualizada correctamente.")
     except Error as e:
-        print("⚠ Error al actualizar:", e)
+        print("Error al actualizar:", e)
 
 def consultarConductor(connection):
     print("\n--- CONSULTAR CONDUCTOR ---")
@@ -324,10 +325,10 @@ def consultarConductor(connection):
     fila = cursor.fetchone()
 
     if not fila:
-        print("❌ No se encontró información del conductor.")
+        print("No se encontró información del conductor.")
         return
 
-    estado = { '1': 'Activo', '2': 'Candidato', '3': 'Despedido' }.get(str(fila[8]), 'Desconocido')
+    estado = { '1': 'Activo', '2': 'Inactivo', '3': 'Despedido' }.get(str(fila[8]), 'Desconocido')
     turnoTexto = { '1': '24 horas', '2': '12 horas' }.get(str(fila[9]), 'No definido')
 
     print(f'''
@@ -353,139 +354,135 @@ def consultarConductor(connection):
 
 def crearTablaMantenimientos(connection):
     cursor = connection.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS mantenimientos (
-            numeroOrden TEXT PRIMARY KEY NOT NULL,
-            placaVehiculo TEXT NOT NULL,
-            nitProveedor TEXT NOT NULL,
-            nombreProveedor TEXT NOT NULL,
-            descripcionServicio TEXT NOT NULL,
-            valorFacturado REAL NOT NULL,
-            fechaServicio TEXT NOT NULL,
-            FOREIGN KEY (placaVehiculo) REFERENCES vehiculos(placa) ON DELETE CASCADE
-        )
-    ''')
+    cursor.execute('''CREATE TABLE IF NOT EXISTS mantenimientos (
+                        numeroOrden TEXT PRIMARY KEY NOT NULL,
+                        placaVehiculo TEXT NOT NULL,
+                        nitProveedor TEXT NOT NULL,
+                        nombreProveedor TEXT NOT NULL,
+                        descripcionServicio TEXT NOT NULL,
+                        valorFacturado REAL NOT NULL,
+                        fechaServicio TEXT NOT NULL,
+                        FOREIGN KEY (placaVehiculo) REFERENCES vehiculos(placa)
+                    )''')
     connection.commit()
 
 def LeerInformacionMantenimiento():
-    numeroDeOrden = input("Número de Orden: ")
-    placaVehiculo = input("Placa del Vehículo: ")
-    nit = input("NIT del proveedor: ")
-    nombreProveedor = input("Nombre del proveedor: ")
-    descripcionServicio = input("Descripción del servicio: ")
-    valorFacturado = input("Valor facturado: ")
+        numeroDeOrden=input("Numero de Orden: ")
+        placaVehiculo=input("Placa: ")
+        nit=input("Nit: ")
+        nombreProveedor=input("Proveedor: ")
+        descripcionServicio=input("Servicio Prestado: ")
+        valorFacturado=input("Valor Facturado: ")
+        from datetime import datetime    #Importar datatime para poder utilizar fechas
+        fecha=True
+        while fecha==True:
+                    fechaServicio =input("Fecha de Servecio en formato dd/mm/aaaa: ")
+                    try:
+                        fecha= datetime.strptime(fechaServicio, "%d/%m/%Y").date()    #Convertir la cadena string en un objeto datetime
+                        fecha_base = fecha.strftime("%Y-%m-%d")    #Convertir objeto datetime en una cadena legible
+                        break
+                    except ValueError:
+                        print("Fecha invalida,  ingrese de nuevo la fecha ")
+        mantenimiento=(numeroDeOrden, placaVehiculo, nit, nombreProveedor, descripcionServicio, valorFacturado, fecha_base)    #Variale utilizada para formar una tupla con los datos ingresados
+        return mantenimiento    #Devolver la variable para poder ser utilizada en otros metodos
 
-    # Validar formato de fecha
-    while True:
-        fechaServicio = input("Fecha del servicio (DD/MM/AAAA): ")
-        try:
-            datetime.strptime(fechaServicio, "%d/%m/%Y")
-            break
-        except ValueError:
-            print("⚠ Fecha inválida. Intente de nuevo (formato DD/MM/AAAA).")
-
-    mantenimiento = (
-        numeroDeOrden, placaVehiculo, nit, nombreProveedor,
-        descripcionServicio, valorFacturado, fechaServicio
-    )
-    return mantenimiento
-
-
-def CrearMantenimiento(connection, mant):
+def CrearMantenimiento(connection,mant):
     try:
-        cursor = connection.cursor()
-        cursor.execute('''INSERT INTO mantenimientos
-                          (numeroOrden, placaVehiculo, nitProveedor, nombreProveedor,
-                           descripcionServicio, valorFacturado, fechaServicio)
-                          VALUES (?, ?, ?, ?, ?, ?, ?)''', mant)
+        cursorObj=connection.cursor()
+        cursorObj.execute('''INSERT INTO mantenimientos (numeroOrden, placaVehiculo, nitProveedor, nombreProveedor, descripcionServicio, valorFacturado, fechaServicio) Values(?,?,?,?,?,?,?)''',mant)
         connection.commit()
-        print("✅ Mantenimiento registrado correctamente.")
-    except sqlite3.IntegrityError as e:
-        if "UNIQUE constraint failed" in str(e):
-            print("⚠ Número de orden repetido. No se puede registrar nuevamente.")
+        print("Se creo correctamente el mantenimiento ")
+    except sqlite3.IntegrityError as error:    #Excepciòn de error de integridad para evitar que hallan campos vacios o numeros de orden repetidos
+        if "UNIQUE constraint failed" in str(error):
+            print("Numero de orden repetido")
         else:
-            print("⚠ Error: Campos vacíos o duplicados no permitidos.")
-    except sqlite3.Error as e:
-        print("❌Error al registrar mantenimiento:", e)
+            print("No se aceptan campos vacios, por favor ingresar de nuevo los datos " )
 
+def ActualizarMantenimientoRealizado(connection):
+    try:
+        cursorObj=connection.cursor()
+        numeroDeOrden=input("Numero de Orden: ")
+        cursorObj.execute("SELECT 1 FROM mantenimientos WHERE numeroOrden="+numeroDeOrden)
+        if cursorObj.fetchone() is None:    #Obtener una sola fila del resultado de la consulta para que si no encuentra nada imprima un mensaje de error
+                print("No se encontro Mantenimiento, Numero de orden inexistente")
+                return    #Si encuentra alo devuelve el valor, si no encuentra nada devuelve None
+        placaVehiculo=input("Placa: ")
+        nit=input("Nit: ")
+        nombreProveedor=input("Nombre del Proveedor")
+        descripcionServicio=input("Descripciòn del Servicio Prestado: ")
+        valorFacturado=input("Valor Facturado: ")
+        from datetime import datetime
+        fecha=True    #Valor booleano para poder crear un bucle while hasta que la fecha sea ingresada correctamente
+        while fecha==True:
+                    fechaServicio =input("Fecha de Servecio en formato dd/mm/aaaa: ")
+                    try:
+                        fecha= datetime.strptime(fechaServicio, "%d/%m/%Y").date()
+                        fecha_base = fecha.strftime("%Y-%m-%d")
+                        break    #Salir del bulce si el usuario ingresa de forma correcta la fecha
+                    except ValueError:    #Captura el error si la fecha esta en un formato invalido
+                        print("Fecha invalida,  ingrese de nuevo la fecha ")
+        #Si alguno de los campos esta vacio imprimira un mensaje de error, el operador not invierte el valor logico y strip elimina los espacios al inicio y al final de la cadena
+        if (not placaVehiculo.strip() or not nit.strip() or not nombreProveedor.strip() or
+            not descripcionServicio.strip() or not valorFacturado.strip() or not fechaServicio.strip()):
+            print("No se aceptan campos vacíos. Por favor ingrese de nuevo los datos.")
+            return
+        cad = ( "UPDATE mantenimientos SET "
+                        "placaVehiculo='" + placaVehiculo + "', "
+                        "nitProveedor='" + nit + "', "
+                        "nombreProveedor='" + nombreProveedor + "', "
+                        "descripcionServicio='" + descripcionServicio + "', "
+                        "valorFacturado='" + valorFacturado + "', "
+                        "fechaServicio='" + fechaServicio + "' "
+                        "WHERE numeroDeOrden='" + numeroDeOrden + "'")
+        cursorObj.execute(cad)
+        connection.commit()
+        print("Se actualizo correctamente el Mantenimiento con el Numero de Orden:  ",numeroDeOrden)
+    except sqlite3.OperationalError as error:    #Atrapa el error de integridad como "error"
+            print("campos vacios o invalidos ")
 
 def ConsultarMantenimientoRealizado(connection):
     try:
-        cursor = connection.cursor()
-        numeroDeOrden = input("Número de orden a consultar: ")
-
-        cursor.execute('''
-            SELECT numeroOrden, placaVehiculo, nitProveedor, nombreProveedor,
-                   descripcionServicio, valorFacturado, fechaServicio
-            FROM mantenimientos
-            WHERE numeroOrden = ?
-        ''', (numeroDeOrden,))
-        fila = cursor.fetchone()
-
-        if fila is None:
-            print("❌ No se encontró mantenimiento con ese número de orden.")
+        cursorObj=connection.cursor()
+        numeroDeOrden=input("Numero de Orden: ")
+        cad='SELECT numeroOrden,  placaVehiculo, nitProveedor, nombreProveedor, descripcionServicio,  valorFacturado,fechaServicio FROM mantenimientos WHERE numeroOrden='+numeroDeOrden
+        cursorObj.execute(cad)
+        filas=cursorObj.fetchall()    #Recupera todos los datos de cad
+        if not filas:    #Si filas esta vacio entonces saltara un mensaje de error
+            print("Numero de orden inexistente")
             return
-
-        print("\n--- INFORMACIÓN DEL MANTENIMIENTO ---")
-        print(f"Número de Orden: {fila[0]}")
-        print(f"Placa del Vehículo: {fila[1]}")
-        print(f"NIT del Proveedor: {fila[2]}")
-        print(f"Nombre del Proveedor: {fila[3]}")
-        print(f"Descripción del Servicio: {fila[4]}")
-        print(f"Valor Facturado: {fila[5]}")
-        print(f"Fecha del Servicio: {fila[6]}")
-        print("----------------------------------------")
-
-    except sqlite3.Error as e:
-        print("⚠ Error al consultar mantenimiento:", e)
-
-
-def ActualizarMantenimientoRealizado(connection):
-    cursor = connection.cursor()
-    numeroDeOrden = input("Número de orden a actualizar: ")
-
-    cursor.execute("SELECT * FROM mantenimientos WHERE numeroOrden = ?", (numeroDeOrden,))
-    fila = cursor.fetchone()
-
-    if not fila:
-        print("❌ No se encontró el mantenimiento especificado.")
-        return
-
-    print("\nIngrese los nuevos datos (deje vacío para mantener el valor actual):")
-
-    placaVehiculo = input(f"Placa ({fila[1]}): ") or fila[1]
-    nit = input(f"NIT proveedor ({fila[2]}): ") or fila[2]
-    nombreProveedor = input(f"Nombre proveedor ({fila[3]}): ") or fila[3]
-    descripcionServicio = input(f"Descripción ({fila[4]}): ") or fila[4]
-    valorFacturado = input(f"Valor facturado ({fila[5]}): ") or fila[5]
-    fechaServicio = input(f"Fecha servicio ({fila[6]}): ") or fila[6]
-
-    try:
-        cursor.execute('''UPDATE mantenimientos
-                          SET placaVehiculo=?, nitProveedor=?, nombreProveedor=?,
-                              descripcionServicio=?, valorFacturado=?, fechaServicio=?
-                          WHERE numeroOrden=?''',
-                       (placaVehiculo, nit, nombreProveedor, descripcionServicio,
-                        valorFacturado, fechaServicio, numeroDeOrden))
-        connection.commit()
-        print("✅ Mantenimiento actualizado correctamente.")
-    except sqlite3.Error as e:
-        print("❌ Error al actualizar mantenimiento:", e)
-
-
+        else:
+            for row in filas:    #Filas en las que se atrapan los datos obtenidos de forma ordenada y coherente con el numero de columnas de la tabla
+                numeroDeOrden=row[0]
+                placa=row[1]
+                ni=row[2]
+                proveedor=row[3]
+                descripcion = row[4]
+                valor = row[5]
+                fecha = row[6]
+                
+                print("Numero de Orden: ",numeroDeOrden,
+                      "\nPlaca: ",placa,
+                      "\nProveedor: ",proveedor,
+                      "\nNit: ",ni,
+                      "\nDescripcion del servicio prestado: ",descripcion,
+                      "\nValor facturado: ",valor,
+                      "\nFecha del servicio: ",fecha)
+    except sqlite3.OperationalError as error:    #Detectar si el campo esta vacio
+            print("Campo vacio")
+            
 def BorrarMantenimiento(connection):
     try:
-        cursor = connection.cursor()
-        numeroDeOrden = input("Número de orden a eliminar: ")
-
-        cursor.execute("DELETE FROM mantenimientos WHERE numeroOrden = ?", (numeroDeOrden,))
-        if cursor.rowcount == 0:
-            print("⚠ No se encontró el mantenimiento. No se eliminó ningún registro.")
+        cursorObj=connection.cursor()
+        numeroDeOrden=input("Numero de Orden: ")
+        cad='DELETE FROM mantenimientos WHERE  numeroOrden='+numeroDeOrden  
+        cursorObj.execute(cad)
+        if cursorObj.rowcount == 0:    #Saber cuantas columnas de la tabla fueron afectadsa en la ejecuciòn, si fueron 0 entonce marcara un mensaje de error
+            print("Numero de orden inexistente, no se pudo eliminar nada")
         else:
-            print("✅ Mantenimiento eliminado correctamente.")
+            print("Se elimino el mantenimiento con el numero de orden: ",numeroDeOrden)
         connection.commit()
-    except sqlite3.Error as e:
-        print("❌ Error al eliminar mantenimiento:", e)
+    except sqlite3.OperationalError as error:    #Detectar si el campo esta vacio
+            print("Campo vacio")
 # ------------------------------------------------------------
 # GENERAR FICHA VEHÍCULO EN PDF
 # ------------------------------------------------------------
@@ -498,7 +495,7 @@ def generarFichaVehiculoPDF(connection):
     cursor.execute("SELECT * FROM vehiculos WHERE placa=?", (placa,))
     vehiculo = cursor.fetchone()
     if not vehiculo:
-        print("❌ No se encontró el vehículo.")
+        print("No se encontró el vehículo.")
         return
 
     # Consultar conductor asignado
@@ -544,7 +541,7 @@ def generarFichaVehiculoPDF(connection):
         y -= 20
 
     c.save()
-    print(f"✅ Ficha PDF generada: {archivo}")
+    print(f"Ficha PDF generada: {archivo}")
 
 # ------------------------------------------------------------
 # MENÚS
@@ -577,7 +574,7 @@ def menuVehiculos(connection):
         elif opcion == "7":
             break
         else:
-            print("⚠ Opción no válida.")
+            print("Opción no válida.")
 
 def menuConductores(connection):
     while True:
@@ -597,7 +594,7 @@ def menuConductores(connection):
         elif opcion == "4":
             break
         else:
-            print("⚠ Opción no válida.")
+            print("Opción no válida.")
 
 def menuMantenimientos(connection):
     salirMantenimiento=True
@@ -622,7 +619,7 @@ def menuMantenimientos(connection):
                   break
         
         else:
-            print("⚠ Opción no válida.")
+            print("Opción no válida.")
 
 # ------------------------------------------------------------
 # MENÚ PRINCIPAL
@@ -653,7 +650,7 @@ def menuPrincipal():
             connection.close()
             break
         else:
-            print("⚠ Opción no válida.")
+            print("Opción no válida.")
 
 # ------------------------------------------------------------
 # PROGRAMA PRINCIPAL
