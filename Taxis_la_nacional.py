@@ -1,7 +1,5 @@
 import sqlite3
 from sqlite3 import Error
-
-#permite crear archivos PDF desde Python.
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from datetime import datetime
@@ -35,43 +33,58 @@ def crearTablaVehiculos(connection):
                         concesionario TEXT NOT NULL,
                         fechaCompraVehiculo TEXT NOT NULL,
                         tiempoGarantia INTEGER NOT NULL,
-                        fechaCompraSeguro TEXT NOT NULL,
-                        proveedorSeguro TEXT NOT NULL,
+                        fechaCompraPolizaSeguro TEXT NOT NULL,
+                        proveedorPolizaSeguro TEXT NOT NULL,
                         fechaCompraSegObligatorio TEXT NOT NULL,
                         proveedorSegObligatorio TEXT NOT NULL,
                         activo INTEGER NOT NULL
                     )''')
     connection.commit()
 
+#Se encarga de rectificar y evitar valores de entrada "inputs" vacios 
+def inputObligatorio(entrada):
+    while True:
+        #metodo .strip() para eliminar espacios en blanco de los extremos de la cadena
+        entrada = input(entrada).strip()
+        if entrada == "":
+            print("⚠️ Lo sentimos el campo no puede estar vacio, porfavor intente de nuevo.")
+        else:
+            return entrada
+        
+#Fuc. que permite egistrar nuevos vehiculos 
 def registrarVehiculo(connection):
     print("\n--- REGISTRAR NUEVO VEHÍCULO ---")
     
     datos = (
-        input("Placa: "), 
-        input("Marca: "),
-        input("Referencia: "),
-        input("Modelo: "),
-        input("Número de chasis: "),
-        input("Número de motor: "),
-        input("Color: "),
-        input("Concesionario: "),
-        input("Fecha de compra (DD/MM/AAAA): "),
-        input("Garantía (meses): "),
-        input("Fecha compra seguro (DD/MM/AAAA): "),
-        input("Proveedor seguro: "),
-        input("Fecha compra seguro obligatorio (DD/MM/AAAA): "),
-        input("Proveedor seguro obligatorio: "),
-        input("Activo (1=Sí / 2=No): ")
+        inputObligatorio("Placa: "), 
+        inputObligatorio("Marca: "),
+        inputObligatorio("Referencia: "),
+        inputObligatorio("Modelo: "),
+        inputObligatorio("Número de chasis: "),
+        inputObligatorio("Número de motor: "),
+        inputObligatorio("Color: "),
+        inputObligatorio("Concesionario: "),
+        inputObligatorio("Fecha de compra (DD/MM/AAAA): "),
+        inputObligatorio("Garantía (meses): "),
+        inputObligatorio("Fecha compra poliza de seguro (DD/MM/AAAA): "),
+        inputObligatorio("Proveedor poliza de seguro: "),
+        inputObligatorio("Fecha compra seguro obligatorio (DD/MM/AAAA): "),
+        inputObligatorio("Proveedor seguro obligatorio: "),
+        inputObligatorio("Activo (1=Sí / 2=No): ")
     )
-
+    
+#Evita ingresar un vehiculo que ya se encuentre registradio por medio de la  PRIMARY KEY "placa"
     try:
         cursor = connection.cursor()
         cursor.execute("INSERT INTO vehiculos VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", datos)
         connection.commit()
         print("✅ Vehículo registrado correctamente.")
+    except sqlite3.IntegrityError:
+        print(f"❌ Error el vehiculo ya se encuntra registrado: ")
     except Error as e:
-        print(f"❌ Error el vehiculo ya se encuntra registrado: ", e)
+        print(f"❌ Error al registrar el vehiculo: ", e)
 
+#Permite consultar la informacion de culquier vehiculo previamente registrado
 def consultarVehiculo(connection):
     placa = input("\nPlaca del vehículo a consultar: ")
     cursor = connection.cursor()
@@ -87,9 +100,9 @@ def consultarVehiculo(connection):
         print(f"Número de motor: {row[5]}")
         print(f"Color: {row[6]}")
         print(f"Concesionario: {row[7]}")
-        print(f"Fecha compra: {row[8]}")
+        print(f"Fecha de compra: {row[8]}")
         print(f"Garantía (meses): {row[9]}")
-        print(f"Seguro: {row[10]} ({row[11]})")
+        print(f"Poliza de Seguro: {row[10]} ({row[11]})")
         print(f"Seguro obligatorio: {row[12]} ({row[13]})")
         print(f"Estado: {'Activo' if row[14] == 1 else 'Inactivo'}")
     else:
@@ -105,16 +118,36 @@ def actualizarEstadoVehiculo(connection):
     nuevoEstado = input("Nuevo estado (1=Activo / 2=Inactivo): ")
     cursor.execute("UPDATE vehiculos SET activo=? WHERE placa=?", (nuevoEstado, placa))
     connection.commit()
-    print("Estado del vehículo actualizado correctamente.")
+    print("✅ Estado del vehículo actualizado correctamente.")
 
 def actualizarPolizaVehiculo(connection):
     print("\n--- ACTUALIZAR POLIZA ---")
-    placa = input("Digite la placa del vehículo: ")
-
-    nuevaFechaCompraSeguro = input("\nDigite su fecha del nuevo seguro (DD/MM/AAAA): ")
-    nuevaProveedorSeguro = input("\nDigite el nombre del nuevo proveedor del seguro: ")
-    nuevaFechaCompraSegObligatorio = input("\nDigite su fecha del nuevo seguro obligatorio (DD/MM/AAAA): ")
-    nuevaProveedorSegObligatorio = input("Digite el nombre del nuevo proveedor del seguro obligatorio: ")
+    placa = inputObligatorio("\nDigite la placa del vehículo: ")
+    
+    #Verificar que se ingrese un numero de placa 
+    if not placa:
+        print("⚠️ La placa no puede estar vacía.")
+        return
+    
+    cursor = connection.cursor()
+    cursor.execute("SELECT fechaCompraPolizaSeguro, proveedorPolizaSeguro, fechaCompraSegObligatorio, proveedorSegObligatorio FROM vehiculos WHERE placa=?", (placa,))
+    row = cursor.fetchone()
+    
+    #Verificar la existencia del vehiculo en la Base de Datos
+    if not row:
+        print("❌ Vehículo no encontrado.")
+        return
+    
+    #Mostrar Informacion actual        
+    print(f"Poliza de seguro actual: Fecha: {row[0]} | Proveedor: {row[1]}")
+    print(f"Seguro obligatorio actual: Fecha: {row[2]} | Proveedor: {row[3]}")
+    
+    
+    #Solicitar actualizacionde de polizas
+    nuevaFechaCompraPolizaSeguro = inputObligatorio("\nDigite fecha de la nueva poliza seguro (DD/MM/AAAA): ")
+    nuevaProveedorPolizaSeguro = inputObligatorio("Digite el nombre del nuevo proveedor de la poliza seguro: ")
+    nuevaFechaCompraSegObligatorio = inputObligatorio("Digite su fecha del nuevo seguro obligatorio (DD/MM/AAAA): ")
+    nuevaProveedorSegObligatorio = inputObligatorio("Digite el nombre del nuevo proveedor del seguro obligatorio: ")
 
     formatoFechas = "%d/%m/%Y"
 
@@ -122,47 +155,35 @@ def actualizarPolizaVehiculo(connection):
         with connection:  # This ensures atomic transaction management
             cursor = connection.cursor()
 
-            # Get current data
-            cursor.execute("SELECT fechaCompraSeguro, fechaCompraSegObligatorio FROM vehiculos WHERE placa=?", (placa,))
-            row = cursor.fetchone()
-            if not row:
-                print("\n❌ Vehículo no encontrado.")
-                return
+            #Obtiene fechas actuales
+            fechaCompraPolizaSeguro = datetime.strptime(row[0], formatoFechas)
+            fechaCompraSegObligatorio = datetime.strptime(row[2], formatoFechas)
             
-            fechaCompraSeguro = datetime.strptime(row[0], formatoFechas)
-            fechaCompraSegObligatorio = datetime.strptime(row[1], formatoFechas)
-
-            # Convert new input dates
-            nuevaFechaCompraSeguro_dt = datetime.strptime(nuevaFechaCompraSeguro, formatoFechas)
+            #Pasa las nuevas fechas con el correcto formato
+            nuevaFechaCompraPolizaSeguro_dt = datetime.strptime(nuevaFechaCompraPolizaSeguro, formatoFechas)
             nuevaFechaCompraSegObligatorio_dt = datetime.strptime(nuevaFechaCompraSegObligatorio, formatoFechas)
-
-            # Update if newer
-            if nuevaFechaCompraSeguro_dt > fechaCompraSeguro:
+            
+            # Actualizacion de datos
+            if nuevaFechaCompraPolizaSeguro_dt > fechaCompraPolizaSeguro:
                 cursor.execute("""
-                    UPDATE vehiculos 
-                    SET fechaCompraSeguro=?, proveedorSeguro=? 
-                    WHERE placa=?
-                """, (nuevaFechaCompraSeguro, nuevaProveedorSeguro, placa))
-                print("\n✅ Póliza de seguro actualizada exitosamente.")
+                    UPDATE vehiculos SET fechaCompraPolizaSeguro=?, proveedorPolizaSeguro=? WHERE placa=? """,
+                    (nuevaFechaCompraPolizaSeguro, nuevaProveedorPolizaSeguro, placa))
+                print("✅ Póliza de seguro actualizada exitosamente.")
             else:
-                print("\n⚠️ La nueva fecha no puede ser anterior a la actual.")
-
+                print("⚠️ La nueva fecha no puede ser anterior a la actual.")
+            
             if nuevaFechaCompraSegObligatorio_dt > fechaCompraSegObligatorio:
                 cursor.execute("""
-                    UPDATE vehiculos 
-                    SET fechaCompraSegObligatorio=?, proveedorSegObligatorio=? 
-                    WHERE placa=?
-                """, (nuevaFechaCompraSegObligatorio, nuevaProveedorSegObligatorio, placa))
-                print("\n✅ Póliza de seguro obligatorio actualizada exitosamente.")
+                    UPDATE vehiculos SET fechaCompraSegObligatorio=?, proveedorSegObligatorio=? WHERE placa=? """,
+                    (nuevaFechaCompraSegObligatorio, nuevaProveedorSegObligatorio, placa))
+                print("✅ Póliza de seguro obligatorio actualizada exitosamente.")
             else:
-                print("\n⚠️ La nueva fecha del SOAT no puede ser anterior a la actual.")
+                print("⚠️ La nueva fecha del SOAT no puede ser anterior a la actual.")
 
-            # `with connection:` auto-commits here safely
-
-    except sqlite3.OperationalError as e:
-        print(f"\n❌ Error de base de datos: {e}")
     except ValueError:
         print("\n❌ Formato incorrecto. Use (DD/MM/AAAA).")
+    except sqlite3.OperationalError as e:
+        print(f"\n❌ Error de base de datos: {e}")
 
 def listaVeiculosActivos(connection):
     print("\n--- LISTA DE VEHICULOS ACTIVOS ---")  
@@ -171,7 +192,7 @@ def listaVeiculosActivos(connection):
     filas  = cursor.fetchall()
     
     if not filas:
-        print("\n⚠️ No existen vehiculos registrados.")
+        print("⚠️ No existen vehiculos registrados.")
         return
     
     for row in filas:
@@ -204,7 +225,7 @@ def crearTablaConductores(connection):
             )'''
     cursorObj.execute(cad)
     connection.commit()
-    print("✅Tabla 'conductores' creada correctamente.")
+    print("Tabla 'conductores' creada correctamente.")
 
 
 def registrarConductor(connection):
@@ -232,9 +253,9 @@ def registrarConductor(connection):
         cursor = connection.cursor()
         cursor.execute('''INSERT INTO conductores VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)''', datos)
         connection.commit()
-        print("✅ Conductor registrado correctamente.")
+        print("Conductor registrado correctamente.")
     except Error as e:
-        print("❌ Error al registrar conductor:", e)
+        print("Error al registrar conductor:", e)
 
 
 def actualizarConductor(connection):
@@ -247,10 +268,10 @@ def actualizarConductor(connection):
 
     # Si no se encuentra el conductor, avisar y salir
     if not fila:
-        print("⚠️ No se encontró el conductor.")
+        print("No se encontró el conductor.")
         return
 
-    # Mostrar los datos actuales para poder validar que se quiere actualizar
+    # Mostrar los datos actuales
     print(f"\nDatos actuales del conductor {fila[1]}:")
     print(f"Dirección actual: {fila[2]}")
     print(f"Teléfono actual: {fila[3]}")
@@ -260,7 +281,7 @@ def actualizarConductor(connection):
     print(f"Valor adeudado actual: {fila[12]}")
     print(f"Total ahorrado no devuelto actual: {fila[13]}\n")
 
-    # Pedir nuevos valores, permitiendo dejar en blanco paa lo que no se quiere cambiar
+    # Pedir nuevos valores, permitiendo dejar en blanco
     direccion = input("Nueva dirección (Enter para mantener actual): ") or fila[2]
     telefono = input("Nuevo teléfono (Enter para mantener actual): ") or fila[3]
     correo = input("Nuevo correo electrónico (Enter para mantener actual): ") or fila[4]
@@ -278,9 +299,9 @@ def actualizarConductor(connection):
                        (direccion, telefono, correo, fechaIngreso, fechaRetiro,
                         valorAdeuda, totalNoDevuelto, noId))
         connection.commit()
-        print("✅ Información actualizada correctamente.")
+        print("Información actualizada correctamente.")
     except Error as e:
-        print("❌ Error al actualizar:", e)
+        print("Error al actualizar:", e)
 
 def consultarConductor(connection):
     print("\n--- CONSULTAR CONDUCTOR ---")
@@ -290,7 +311,7 @@ def consultarConductor(connection):
     fila = cursor.fetchone()
 
     if not fila:
-        print("❌ No se encontró información del conductor.")
+        print("No se encontró información del conductor.")
         return
 
     estado = { '1': 'Activo', '2': 'Inactivo', '3': 'Despedido' }.get(str(fila[8]), 'Desconocido')
@@ -320,36 +341,134 @@ def consultarConductor(connection):
 def crearTablaMantenimientos(connection):
     cursor = connection.cursor()
     cursor.execute('''CREATE TABLE IF NOT EXISTS mantenimientos (
-                        numeroOrden TEXT PRIMARY KEY,
+                        numeroOrden TEXT PRIMARY KEY NOT NULL,
                         placaVehiculo TEXT NOT NULL,
                         nitProveedor TEXT NOT NULL,
                         nombreProveedor TEXT NOT NULL,
-                        descripcionServicio TEXT,
-                        valorFacturado REAL,
-                        fechaServicio TEXT,
+                        descripcionServicio TEXT NOT NULL,
+                        valorFacturado REAL NOT NULL,
+                        fechaServicio TEXT NOT NULL,
                         FOREIGN KEY (placaVehiculo) REFERENCES vehiculos(placa)
                     )''')
     connection.commit()
 
-def registrarMantenimiento(connection):
-    print("\n--- REGISTRAR MANTENIMIENTO ---")
-    datos = (
-        input("Número de orden: "),
-        input("Placa del vehículo: "),
-        input("NIT proveedor: "),
-        input("Nombre proveedor: "),
-        input("Descripción servicio: "),
-        float(input("Valor facturado: ")),
-        input("Fecha del servicio (DD/MM/AAAA): ")
-    )
-    try:
-        cursor = connection.cursor()
-        cursor.execute("INSERT INTO mantenimientos VALUES (?,?,?,?,?,?,?)", datos)
-        connection.commit()
-        print("Mantenimiento registrado correctamente.")
-    except Error as e:
-        print("Error al registrar mantenimiento:", e)
+def LeerInformacionMantenimiento():
+        numeroDeOrden=input("Numero de Orden: ")
+        placaVehiculo=input("Placa: ")
+        nit=input("Nit: ")
+        nombreProveedor=input("Proveedor: ")
+        descripcionServicio=input("Servicio Prestado: ")
+        valorFacturado=input("Valor Facturado: ")
+        from datetime import datetime    #Importar datatime para poder utilizar fechas
+        fecha=True
+        while fecha==True:
+                    fechaServicio =input("Fecha de Servecio en formato dd/mm/aaaa: ")
+                    try:
+                        fecha= datetime.strptime(fechaServicio, "%d/%m/%Y").date()    #Convertir la cadena string en un objeto datetime
+                        fecha_base = fecha.strftime("%Y-%m-%d")    #Convertir objeto datetime en una cadena legible
+                        break
+                    except ValueError:
+                        print("Fecha invalida,  ingrese de nuevo la fecha ")
+        mantenimiento=(numeroDeOrden, placaVehiculo, nit, nombreProveedor, descripcionServicio, valorFacturado, fecha_base)    #Variale utilizada para formar una tupla con los datos ingresados
+        return mantenimiento    #Devolver la variable para poder ser utilizada en otros metodos
 
+def CrearMantenimiento(connection,mant):
+    try:
+        cursorObj=connection.cursor()
+        cursorObj.execute('''INSERT INTO mantenimientos (numeroOrden, placaVehiculo, nitProveedor, nombreProveedor, descripcionServicio, valorFacturado, fechaServicio) Values(?,?,?,?,?,?,?)''',mant)
+        connection.commit()
+        print("Se creo correctamente el mantenimiento ")
+    except sqlite3.IntegrityError as error:    #Excepciòn de error de integridad para evitar que hallan campos vacios o numeros de orden repetidos
+        if "UNIQUE constraint failed" in str(error):
+            print("Numero de orden repetido")
+        else:
+            print("No se aceptan campos vacios, por favor ingresar de nuevo los datos " )
+
+def ActualizarMantenimientoRealizado(connection):
+    try:
+        cursorObj=connection.cursor()
+        numeroDeOrden=input("Numero de Orden: ")
+        cursorObj.execute("SELECT 1 FROM mantenimientos WHERE numeroOrden="+numeroDeOrden)
+        if cursorObj.fetchone() is None:    #Obtener una sola fila del resultado de la consulta para que si no encuentra nada imprima un mensaje de error
+                print("No se encontro Mantenimiento, Numero de orden inexistente")
+                return    #Si encuentra alo devuelve el valor, si no encuentra nada devuelve None
+        placaVehiculo=input("Placa: ")
+        nit=input("Nit: ")
+        nombreProveedor=input("Nombre del Proveedor")
+        descripcionServicio=input("Descripciòn del Servicio Prestado: ")
+        valorFacturado=input("Valor Facturado: ")
+        from datetime import datetime
+        fecha=True    #Valor booleano para poder crear un bucle while hasta que la fecha sea ingresada correctamente
+        while fecha==True:
+                    fechaServicio =input("Fecha de Servecio en formato dd/mm/aaaa: ")
+                    try:
+                        fecha= datetime.strptime(fechaServicio, "%d/%m/%Y").date()
+                        fecha_base = fecha.strftime("%Y-%m-%d")
+                        break    #Salir del bulce si el usuario ingresa de forma correcta la fecha
+                    except ValueError:    #Captura el error si la fecha esta en un formato invalido
+                        print("Fecha invalida,  ingrese de nuevo la fecha ")
+        #Si alguno de los campos esta vacio imprimira un mensaje de error, el operador not invierte el valor logico y strip elimina los espacios al inicio y al final de la cadena
+        if (not placaVehiculo.strip() or not nit.strip() or not nombreProveedor.strip() or
+            not descripcionServicio.strip() or not valorFacturado.strip() or not fechaServicio.strip()):
+            print("No se aceptan campos vacíos. Por favor ingrese de nuevo los datos.")
+            return
+        cad = ( "UPDATE mantenimientos SET "
+                        "placaVehiculo='" + placaVehiculo + "', "
+                        "nitProveedor='" + nit + "', "
+                        "nombreProveedor='" + nombreProveedor + "', "
+                        "descripcionServicio='" + descripcionServicio + "', "
+                        "valorFacturado='" + valorFacturado + "', "
+                        "fechaServicio='" + fechaServicio + "' "
+                        "WHERE numeroDeOrden='" + numeroDeOrden + "'")
+        cursorObj.execute(cad)
+        connection.commit()
+        print("Se actualizo correctamente el Mantenimiento con el Numero de Orden:  ",numeroDeOrden)
+    except sqlite3.OperationalError as error:    #Atrapa el error de integridad como "error"
+            print("campos vacios o invalidos ")
+
+def ConsultarMantenimientoRealizado(connection):
+    try:
+        cursorObj=connection.cursor()
+        numeroDeOrden=input("Numero de Orden: ")
+        cad='SELECT numeroOrden,  placaVehiculo, nitProveedor, nombreProveedor, descripcionServicio,  valorFacturado,fechaServicio FROM mantenimientos WHERE numeroOrden='+numeroDeOrden
+        cursorObj.execute(cad)
+        filas=cursorObj.fetchall()    #Recupera todos los datos de cad
+        if not filas:    #Si filas esta vacio entonces saltara un mensaje de error
+            print("Numero de orden inexistente")
+            return
+        else:
+            for row in filas:    #Filas en las que se atrapan los datos obtenidos de forma ordenada y coherente con el numero de columnas de la tabla
+                numeroDeOrden=row[0]
+                placa=row[1]
+                ni=row[2]
+                proveedor=row[3]
+                descripcion = row[4]
+                valor = row[5]
+                fecha = row[6]
+                
+                print("Numero de Orden: ",numeroDeOrden,
+                      "\nPlaca: ",placa,
+                      "\nProveedor: ",proveedor,
+                      "\nNit: ",ni,
+                      "\nDescripcion del servicio prestado: ",descripcion,
+                      "\nValor facturado: ",valor,
+                      "\nFecha del servicio: ",fecha)
+    except sqlite3.OperationalError as error:    #Detectar si el campo esta vacio
+            print("Campo vacio")
+            
+def BorrarMantenimiento(connection):
+    try:
+        cursorObj=connection.cursor()
+        numeroDeOrden=input("Numero de Orden: ")
+        cad='DELETE FROM mantenimientos WHERE  numeroOrden='+numeroDeOrden  
+        cursorObj.execute(cad)
+        if cursorObj.rowcount == 0:    #Saber cuantas columnas de la tabla fueron afectadsa en la ejecuciòn, si fueron 0 entonce marcara un mensaje de error
+            print("Numero de orden inexistente, no se pudo eliminar nada")
+        else:
+            print("Se elimino el mantenimiento con el numero de orden: ",numeroDeOrden)
+        connection.commit()
+    except sqlite3.OperationalError as error:    #Detectar si el campo esta vacio
+            print("Campo vacio")
 # ------------------------------------------------------------
 # GENERAR FICHA VEHÍCULO EN PDF
 # ------------------------------------------------------------
@@ -370,8 +489,8 @@ def generarFichaVehiculoPDF(connection):
     conductor = cursor.fetchone()
 
     # Consultar mantenimientos
-    cursor.execute("SELECT fechaServicio, descripcionServicio, valorFacturado FROM mantenimientos WHERE placaVehiculo=?", (placa,))
-    mantenimientos = cursor.fetchall()
+    cursor.execute("SELECT numeroOrden, nombreProveedor, nitproveedor, descripcionServicio , valorFacturado, valorFacturado FROM mantenimientos WHERE placaVehiculo=?", (placa,))
+    mantenimientos = cursor.fetchone()
 
     archivo = f"Ficha_Vehiculo_{placa}.pdf"
     c = canvas.Canvas(archivo, pagesize=letter)
@@ -393,10 +512,18 @@ def generarFichaVehiculoPDF(connection):
     else:
         c.drawString(50, 570, "Conductor: No asignado")
 
-    c.drawString(50, 500, "Mantenimientos recientes:")
+    c.drawString(50, 500, "Mantenimientos realizados:")
     y = 480
-    for m in mantenimientos:
-        c.drawString(60, y, f"{m[0]} - {m[1]} (${m[2]})")
+    if mantenimientos:
+        c.drawString(60, 480, f"Numero de Orden: {mantenimientos[0]}")
+        c.drawString(60, 460, f"Nombre del Proveedor: {mantenimientos[1]}")
+        c.drawString(60, 440, f"Nit del Proveedor: {mantenimientos[2]}")
+        c.drawString(60, 420, f"Descripciòn del Servicio: {mantenimientos[3]}")
+        c.drawString(60, 400, f"Valor Facturado: {mantenimientos[4]}")
+        c.drawString(60, 380, f"Fecha el Servicio: {mantenimientos[5]}")
+    else:
+        c.drawString(50, y, "No hay manteniemientos")
+
         y -= 20
 
     c.save()
@@ -411,7 +538,7 @@ def menuVehiculos(connection):
         print("\n=== MENÚ VEHÍCULOS ===")
         print("1. Registrar vehículo")
         print("2. Consultar vehículo")
-        print("3. Actualizar estado")
+        print("3. Actualizar Estado del vehiculo")
         print("4. Actualizar Polizas")
         print("5. Lista de Vehiculos activos")
         print("6. Generar ficha PDF")
@@ -456,15 +583,27 @@ def menuConductores(connection):
             print("Opción no válida.")
 
 def menuMantenimientos(connection):
+    salirMantenimiento=True
     while True:
         print("\n=== MENÚ MANTENIMIENTOS ===")
         print("1. Registrar mantenimiento")
-        print("2. Volver al menú principal")
-        opcion = input("Seleccione: ")
-        if opcion == "1":
-            registrarMantenimiento(connection)
-        elif opcion == "2":
-            break
+        print("2. Consultar Mantenimiento Realizado")
+        print("3. Borrar Manteniento")
+        print("4. Actualizar mantenimiento")
+        print("5. Volver al menú principal")
+        opcMantenimientos = input("Seleccione: ")
+        if  (opcMantenimientos=='1'):
+                MiMantenimiento=LeerInformacionMantenimiento()
+                CrearMantenimiento(connection,MiMantenimiento)
+        elif    (opcMantenimientos=='2'):
+                ConsultarMantenimientoRealizado(connection)
+        elif    (opcMantenimientos=='3'):
+                BorrarMantenimiento(connection)
+        elif (opcMantenimientos=='4'):
+                ActualizarMantenimientoRealizado(connection)
+        elif    (opcMantenimientos=='5'):
+                  break
+        
         else:
             print("Opción no válida.")
 
@@ -505,3 +644,4 @@ def menuPrincipal():
 
 if __name__ == "__main__":
     menuPrincipal()
+    

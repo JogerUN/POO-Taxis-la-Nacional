@@ -1,15 +1,97 @@
-menuPrincipal()
+# 🚖 Sistema de Gestión **Taxis La Nacional**
+
+## 📋 Descripción general
+
+**Taxis La Nacional** es un sistema desarrollado en **Python + SQLite3** para la **gestión integral de vehículos, conductores y mantenimientos** de una empresa de transporte.  
+Permite registrar, consultar, actualizar y generar reportes en PDF sobre los vehículos y su historial de servicio.
+
+El sistema se ejecuta completamente en consola y almacena los datos en una base de datos local (`taxis_la_nacional.db`).
+
+
+## 🧠 Características principales
+
+### 🔹 Módulo de Vehículos
+- Registro de nuevos vehículos.
+- Consulta detallada por placa.
+- Actualización del estado (activo/inactivo).
+- Actualización de pólizas de seguro y SOAT.
+- Listado de vehículos activos.
+- Generación de ficha PDF con todos los datos del vehículo y su conductor asignado.
+
+### 🔹 Módulo de Conductores
+- Registro de nuevos conductores.
+- Consulta por número de identificación.
+- Actualización de datos personales, laborales y financieros.
+- Relación directa con el vehículo asignado.
+
+### 🔹 Módulo de Mantenimientos
+- Registro de mantenimientos realizados.
+- Consulta, actualización y eliminación de mantenimientos.
+- Control de proveedor, valor facturado y fecha del servicio.
+
+
+## ⚙️ Tecnologías utilizadas
+
+- **Python 3.x**
+- **SQLite3** (Base de datos local)
+- **ReportLab** (para generar reportes PDF)
+- Librerías estándar:
+  - `datetime`
+  - `sqlite3`
+  - `reportlab.pdfgen`
+  - `reportlab.lib.pagesizes`
+
+
+### 📦 Instalación y configuración
+## 1️⃣ Clonar el repositorio
+```bash
+git clone https://github.com/tu_usuario/Taxis_La_Nacional.git
+cd Taxis_La_Nacional
+
+## 2️⃣ Instalar dependencias
+      pip install dev_requirements.txt
+
+## 3️⃣ Crear la base de datos
+Ejecuta el script que genera la base de datos inicial:
+      python crear_db_taxis.py
+
+## 4️⃣ Ejecución del programa
+Ejecuta el programa principal:
+
+      python TAXIS_LA_NACIONAL.py
+
+Aparecerá un menú interactivo en consola con las siguientes opciones:
+      === SISTEMA TAXIS LA NACIONAL ===
+      1. Gestión de vehículos
+      2. Gestión de conductores
+      3. Gestión de mantenimientos
+      4. Salir
+Cada módulo tiene sus propias opciones de registro, consulta y actualización.
+
+## 4️⃣🧾 Generación de reportes
+
+Desde el menú de vehículos, puedes generar una ficha PDF con toda la información del vehículo y su conductor:
+      Ficha_Vehiculo_<placa>.pdf
+El archivo se genera automáticamente en el directorio del proyecto.
+
+🧰 Estructura del proyecto
+TAXIS_LA_NACIONAL/
 │
-├── menuVehiculos()
-│     ├── registrarVehiculo()
-│     ├── consultarVehiculo()
-│     ├── actualizarEstadoVehiculo()
-│     ├── generarFichaVehiculoPDF()
-│
-├── menuConductores()
-│     ├── registrarConductor()
-│     ├── consultarConductor()
-│     ├── actualizarConductor()
-│
-└── menuMantenimientos()
-      └── registrarMantenimiento()
+├── TAXIS_LA_NACIONAL.py       # Código principal del sistema
+├── crear_db_taxis.py           # Script para generar la base de datos con datos iniciales
+├── taxis_la_nacional.db        # Base de datos SQLite
+├── Ficha_Vehiculo_<placa>.pdf  # Archivos PDF generados
+└── README.md                   # Documentación del proyecto
+
+👨‍💻 Autores
+
+Desarrollado por:
+      kn844948-art
+      jimmysancayetano-droid
+      JogerUN
+Colaboradores y soporte técnico:
+      ChatGPT (Asistente IA) 🤖
+
+🛡️ Licencia
+
+Este proyecto está bajo la licencia MIT — libre para uso educativo y comercial, siempre que se otorgue crédito al autor original.
