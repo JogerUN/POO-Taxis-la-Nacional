@@ -248,7 +248,7 @@ def registrarConductor(connection):
     direccion = input("Dirección: ")
     telefono = input("Teléfono: ")
     correo = input("Correo electrónico: ")
-    placaVehiculo = input("Placa del vehículo asignado: ")
+    placaVehiculo = input("Placa del vehículo asignado: ")1
     fechaIngreso = input("Fecha de ingreso (DD/MM/AAAA o vacío si no aplica): ")
     fechaRetiro = input("Fecha de retiro (DD/MM/AAAA o vacío si no aplica): ")
     indicadorContratado = input("Estado (1=Activo / 2=Candidato / 3=Despedido): ")
