@@ -74,7 +74,16 @@ def validarEntero(mensaje):
             return int(entrada)
         else:
             print("❌ Ingrese un numero entero.")
- 
+
+def covertirPlaca(mensaje):
+    """Verifica que sea un número entero."""
+    while True:
+        entrada = input(mensaje).strip()
+        if entrada == "":
+            print(" ⚠️ Lo sentimos el campo no puede estar vacio, porfavor intente de nuevo. ")
+        else:
+            return entrada.upper()
+
         
 #Fuc. que permite registrar nuevos vehiculos 
 def registrarVehiculo(connection):
@@ -82,7 +91,7 @@ def registrarVehiculo(connection):
     
     try:
         datos = (
-            inputObligatorio("Placa: ").upper(),
+            covertirPlaca("Placa: "),
             inputObligatorio("Marca: "),
             inputObligatorio("Referencia: "),
             validarEntero("Modelo: "),
