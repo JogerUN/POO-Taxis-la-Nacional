@@ -43,57 +43,68 @@ def crearTablaVehiculos(connection):
                     )''')
     connection.commit()
 
-#Se encarga de rectificar y evitar valores de entrada "inputs" vacios 
+#Funciones para asegurar el correcto input 
+#   Evita valores vacios.
 def inputObligatorio(mensaje):
-    #metodo .strip() para eliminar espacios en blanco de los extremos de la cadena
-    entrada = input(mensaje).strip()
-    if entrada == "":
-        print(" ⚠️ Lo sentimos el campo no puede estar vacio, porfavor intente de nuevo.")
-        print("Regresando al menu anterior...")
-        return None
-    else:
-        return entrada
+    while True:
+        entrada = input(mensaje).strip()
+        if entrada == "":
+            print(" ⚠️ Lo sentimos el campo no puede estar vacio, porfavor intente de nuevo.")
+            print("Regresando al menu anterior...")
+            return None
+        else:
+            return entrada
+ 
+def validarFecha(mensaje):
+    """Valida formato DD/MM/AAAA."""
+    while True:
+        entrada = inputObligatorio(mensaje)
+        try:
+            formatoFechas = "%d/%m/%Y"
+            datetime.strptime(entrada, formatoFechas)
+            return entrada
+        except ValueError:
+            print("❌ Fecha invalida. Use el formato DD/MM/AAAA.")
+
+def validarEntero(mensaje):
+    """Verifica que sea un número entero."""
+    while True:
+        entrada = inputObligatorio(mensaje)
+        if entrada.isdigit():
+            return int(entrada)
+        else:
+            print("❌ Ingrese un numero entero.")
+ 
         
 #Fuc. que permite registrar nuevos vehiculos 
 def registrarVehiculo(connection):
     print("\n--- REGISTRAR NUEVO VEHÍCULO ---")
     
-    campos = [
-        "Placa: ", 
-        "Marca: ",
-        "Referencia: ",
-        "Modelo: ",
-        "Número de chasis: ",
-        "Número de motor: ",
-        "Color: ",
-        "Concesionario: ",
-        "Fecha de compra (DD/MM/AAAA): ",
-        "Garantía (meses): ",
-        "Fecha compra poliza de seguro (DD/MM/AAAA): ",
-        "Proveedor poliza de seguro: ",
-        "Fecha compra seguro obligatorio (DD/MM/AAAA): ",
-        "Proveedor seguro obligatorio: ",
-        "Activo (1=Sí / 2=No): "
-    ]
-    
-    datos=[] #Lista temporal para guardar valores ingresados
-    
-    #Verifica que se ingresen dator de lo contrario retorna al menu anterior
-    for campo in campos:
-        entrada = inputObligatorio(campo)
-        if entrada is None:
-            print("❌ Registro cancelado. No se guardaron datos.")
-            return
-        datos.append(entrada) #Une cada dato a la lista datos=[] 
-
-    datos = tuple(datos) #convertimos la lista en tupla 
+    try:
+        datos = (
+            inputObligatorio("Placa: ").upper(),
+            inputObligatorio("Marca: "),
+            inputObligatorio("Referencia: "),
+            validarEntero("Modelo: "),
+            inputObligatorio("Número de chasis: "),
+            inputObligatorio("Número de motor: "),
+            inputObligatorio("Color: "),
+            inputObligatorio("Concesionario: "),
+            validarFecha("Fecha de compra (DD/MM/AAAA): "),
+            validarEntero("Garantía (meses): "),
+            validarFecha("Fecha compra póliza de seguro (DD/MM/AAAA): "),
+            inputObligatorio("Proveedor póliza de seguro: "),
+            validarFecha("Fecha compra seguro obligatorio (DD/MM/AAAA): "),
+            inputObligatorio("Proveedor seguro obligatorio: "),
+            validarEntero("Activo (1=Sí / 2=No): ")
+        )
     
 #Evita ingresar un vehiculo que ya se encuentre registradio por medio de la  PRIMARY KEY "placa"
-    try:
         cursor = connection.cursor()
         cursor.execute("INSERT INTO vehiculos VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", datos)
         connection.commit()
         print("✅ Vehículo registrado correctamente.")
+        
     except sqlite3.IntegrityError:
         print(f"❌ Error el vehiculo ya se encuntra registrado: ")
     except Error as e:
