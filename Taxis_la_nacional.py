@@ -101,7 +101,7 @@ def registrarVehiculo(connection):
 
 #Permite consultar la informacion de culquier vehiculo previamente registrado
 def consultarVehiculo(connection):
-    placa = input("\nPlaca del vehículo a consultar: ")
+    placa = input("\nPlaca del vehículo a consultar: ").upper()
     cursor = connection.cursor()
     cursor.execute("SELECT * FROM vehiculos WHERE placa=?", (placa,))
     row = cursor.fetchone()
