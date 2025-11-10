@@ -1,3 +1,4 @@
+#Librerias a instalar reportlab comando --> pip install reportlab
 import sqlite3
 from sqlite3 import Error
 from reportlab.lib.pagesizes import letter
