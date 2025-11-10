@@ -2,6 +2,7 @@ import sqlite3
 from sqlite3 import Error
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
+from reportlab.lib.units import inch
 from datetime import datetime
 
 # ------------------------------------------------------------
@@ -642,60 +643,118 @@ def BorrarMantenimiento(connection):
 # ------------------------------------------------------------
 
 def generarFichaVehiculoPDF(connection):
-    placa = input("\nIngrese la placa del vehículo para generar ficha: ")
+    placa = input("\nIngrese la placa del vehículo para generar ficha: ").strip().upper()
     cursor = connection.cursor()
 
-    # Consultar vehículo
+    
+    # 1. CONSULTAR VEHÍCULO
     cursor.execute("SELECT * FROM vehiculos WHERE placa=?", (placa,))
     vehiculo = cursor.fetchone()
     if not vehiculo:
-        print("❌ No se encontró el vehículo.")
+        print("❌ No se encontró el vehículo con esa placa.")
         return
 
-    # Consultar conductor asignado
-    cursor.execute("SELECT nombreCompleto, telefono, correoElectronico FROM conductores WHERE placaVehiculo=?", (placa,))
+    # 2. CONSULTAR CONDUCTOR
+    cursor.execute("""
+        SELECT nombreCompleto, telefono, correoElectronico, direccion 
+        FROM conductores 
+        WHERE placaVehiculo=?
+    """, (placa,))
     conductor = cursor.fetchone()
 
-    # Consultar mantenimientos
-    cursor.execute("SELECT numeroOrden, nombreProveedor, nitproveedor, descripcionServicio , valorFacturado, valorFacturado FROM mantenimientos WHERE placaVehiculo=?", (placa,))
-    mantenimientos = cursor.fetchone()
+    # 3. CONSULTAR MANTENIMIENTOS
+    cursor.execute("""
+        SELECT numeroOrden, nombreProveedor, nitProveedor, descripcionServicio, valorFacturado, fechaServicio
+        FROM mantenimientos 
+        WHERE placaVehiculo=? 
+        ORDER BY fechaServicio DESC
+    """, (placa,))
+    mantenimientos = cursor.fetchall()
 
+    # 4. CREAR ARCHIVO PDF
     archivo = f"Ficha_Vehiculo_{placa}.pdf"
     c = canvas.Canvas(archivo, pagesize=letter)
-    c.setFont("Helvetica", 12)
+    width, height = letter
+    c.setFont("Helvetica-Bold", 16)
+    c.drawCentredString(width / 2, height - 50, "🚖 FICHA INTEGRADA DE VEHÍCULO")
 
-    c.drawString(200, 750, "FICHA DE VEHÍCULO")
-    c.drawString(50, 720, f"Placa: {vehiculo[0]}")
-    c.drawString(50, 700, f"Marca: {vehiculo[1]}")
-    c.drawString(50, 680, f"Referencia: {vehiculo[2]}")
-    c.drawString(50, 660, f"Modelo: {vehiculo[3]}")
-    c.drawString(50, 640, f"Color: {vehiculo[6]}")
-    c.drawString(50, 620, f"Concesionario: {vehiculo[7]}")
-    c.drawString(50, 600, f"Activo: {'Sí' if vehiculo[14]==1 else 'No'}")
+    # Línea divisoria
+    c.line(50, height - 60, width - 50, height - 60)
+
+    # 5. SECCIÓN VEHÍCULO
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(50, height - 90, "📘 Información del vehículo:")
+    c.setFont("Helvetica", 11)
+
+    labels = [
+        f"Placa: {vehiculo[0]}",
+        f"Marca: {vehiculo[1]}",
+        f"Referencia: {vehiculo[2]}",
+        f"Modelo: {vehiculo[3]}",
+        f"Chasis: {vehiculo[4]}",
+        f"Motor: {vehiculo[5]}",
+        f"Color: {vehiculo[6]}",
+        f"Concesionario: {vehiculo[7]}",
+        f"Fecha de compra: {vehiculo[8]}",
+        f"Tiempo garantía: {vehiculo[9]} meses",
+        f"Fecha compra seguro: {vehiculo[10]} ({vehiculo[11]})",
+        f"Fecha compra SOAT: {vehiculo[12]} ({vehiculo[13]})",
+        f"Activo: {'Sí' if vehiculo[14] == 1 else 'No'}"
+    ]
+
+    y = height - 110
+    for info in labels:
+        y -= 15
+        c.drawString(60, y, info)
+
+    # 6. SECCIÓN CONDUCTOR
+    y -= 25
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(50, y, "🧍 Conductor asignado:")
+    c.setFont("Helvetica", 11)
+    y -= 20
 
     if conductor:
-        c.drawString(50, 570, f"Conductor: {conductor[0]}")
-        c.drawString(50, 550, f"Teléfono: {conductor[1]}")
-        c.drawString(50, 530, f"Correo: {conductor[2]}")
+        c.drawString(60, y, f"Nombre: {conductor[0]}")
+        y -= 15
+        c.drawString(60, y, f"Teléfono: {conductor[1]}")
+        y -= 15
+        c.drawString(60, y, f"Correo: {conductor[2]}")
+        y -= 15
+        c.drawString(60, y, f"Dirección: {conductor[3]}")
     else:
-        c.drawString(50, 570, "Conductor: No asignado")
+        c.drawString(60, y, "No hay conductor asignado a este vehículo.")
 
-    c.drawString(50, 500, "Mantenimientos realizados:")
-    y = 480
-    if mantenimientos:
-        c.drawString(60, 480, f"Numero de Orden: {mantenimientos[0]}")
-        c.drawString(60, 460, f"Nombre del Proveedor: {mantenimientos[1]}")
-        c.drawString(60, 440, f"Nit del Proveedor: {mantenimientos[2]}")
-        c.drawString(60, 420, f"Descripciòn del Servicio: {mantenimientos[3]}")
-        c.drawString(60, 400, f"Valor Facturado: {mantenimientos[4]}")
-        c.drawString(60, 380, f"Fecha el Servicio: {mantenimientos[5]}")
+    # 7. SECCIÓN MANTENIMIENTOS
+    y -= 35
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(50, y, "🧾 Historial de mantenimientos:")
+    y -= 20
+    c.setFont("Helvetica", 10)
+
+    if not mantenimientos:
+        c.drawString(60, y, "No hay registros de mantenimiento.")
     else:
-        c.drawString(50, y, "No hay manteniemientos")
+        for m in mantenimientos:
+            if y < 100:  # Salto de página automático
+                c.showPage()
+                y = height - 80
+                c.setFont("Helvetica", 10)
+            c.drawString(60, y, f"Orden #{m[0]} | {m[5]}")
+            y -= 12
+            c.drawString(80, y, f"Proveedor: {m[1]} ({m[2]})")
+            y -= 12
+            c.drawString(80, y, f"Servicio: {m[3]}")
+            y -= 12
+            c.drawString(80, y, f"Valor: ${m[4]:,.0f}")
+            y -= 18
 
-        y -= 20
+    # 8. PIE DE PÁGINA
+    c.setFont("Helvetica-Oblique", 9)
+    c.drawCentredString(width / 2, 40, f"Generado automáticamente por el Sistema Taxis La Nacional — {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}")
 
     c.save()
-    print(f"✅ Ficha PDF generada: {archivo}")
+    print(f"✅ Ficha PDF generada exitosamente: {archivo}")
 
 # ------------------------------------------------------------
 # MENÚS
@@ -811,4 +870,3 @@ def menuPrincipal():
 
 if __name__ == "__main__":
     menuPrincipal()
-    
