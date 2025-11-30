@@ -1,16 +1,18 @@
-# menus/menu_principal.py
 import sys
 from menus.menu_base import Menu
 from menus.menu_vehiculos import MenuVehiculos
-from menus.menu_conductores import MenuConductores 
-from menus.menu_mantenimientos import MenuMantenimientos
+from menus.menu_conductores import MenuConductores
+from database.connection import crearConexion  # <-- IMPORTAR CONEXIÓN
 
 class MenuPrincipal(Menu):
 
     def __init__(self):
+        # Crear la conexión una sola vez
+        self.connection = crearConexion()
+
         opciones = {
             "1": ("Módulo Vehículos", self.menuVehiculos),
-            "2": ("Módulo Conductores (Próximamente)", self.conductores),
+            "2": ("Módulo Conductores", self.conductores),
             "3": ("Módulo Mantenimientos (Próximamente)", self.mantenimientos),
             "4": ("Salir", self.salir)
         }
@@ -18,13 +20,13 @@ class MenuPrincipal(Menu):
         super().__init__("SISTEMA DE GESTIÓN - TAXIS LA NACIONAL", opciones)
 
     def menuVehiculos(self):
-        MenuVehiculos().mostrar()
+        MenuVehiculos().mostrar()  
 
     def conductores(self):
-        MenuConductores().mostrar()
+        MenuConductores(self.connection).mostrar() 
 
     def mantenimientos(self):
-        MenuMantenimientos().mostrar()
+        print("\n🚧 Módulo de Mantenimientos en desarrollo…\n")
 
     def salir(self):
         print("\n👋 Gracias por usar el sistema. ¡Hasta luego!")

@@ -1,31 +1,28 @@
-# menus/menu_principal.py
 import sys
 from menus.menu_base import Menu
-from menus.menu_vehiculos import MenuVehiculos
-from menus.menu_conductores import MenuConductores 
 from menus.menu_mantenimientos import MenuMantenimientos
+
 
 class MenuPrincipal(Menu):
 
     def __init__(self):
         opciones = {
-            "1": ("Módulo Vehículos", self.menuVehiculos),
             "2": ("Módulo Conductores (Próximamente)", self.conductores),
-            "3": ("Módulo Mantenimientos (Próximamente)", self.mantenimientos),
+            "3": ("Módulo Mantenimientos", self.menuMantenimientos),
             "4": ("Salir", self.salir)
         }
 
         super().__init__("SISTEMA DE GESTIÓN - TAXIS LA NACIONAL", opciones)
 
-    def menuVehiculos(self):
-        MenuVehiculos().mostrar()
-
-    def conductores(self):
-        MenuConductores().mostrar()
-
-    def mantenimientos(self):
+    # ==== Menú de mantenimientos ====
+    def menuMantenimientos(self):
         MenuMantenimientos().mostrar()
 
+    # ==== Conductores aún no implementado ====
+    def conductores(self):
+        print("\n🚧 Módulo de Conductores en desarrollo…\n")
+
+    # ==== Salida del programa ====
     def salir(self):
         print("\n👋 Gracias por usar el sistema. ¡Hasta luego!")
         sys.exit()
