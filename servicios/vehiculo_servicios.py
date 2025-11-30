@@ -5,12 +5,7 @@
 
 from modulos.vehiculo import Vehiculo
 from repositorios.vehiculo_repo import RepositorioVehiculo
-from tools.validadores import (
-    inputObligatorio,
-    validarFecha,
-    validarEntero,
-    convertirPlaca
-)
+from tools.validadores import (inputObligatorio, validarFecha, validarEntero, convertirPlaca)
 from database.connection import crearConexion
 
 

@@ -1,6 +1,6 @@
 # repositorios/vehiculo_repo.py
 # =============================================================
-# REPOSITORIO DE VEHÍCULOS (CRUD)
+# REPOSITORIO DE VEHÍCULOS (CRUD) Create Read Update Delete
 # Encargado de comunicación con la base de datos exclusivamente.
 # =============================================================
 
