@@ -82,3 +82,14 @@ def convertirPlaca(mensaje):
             print(" ⚠️ La placa no puede estar vacía. Intente nuevamente.\n")
             continue
         return entrada.upper()
+
+
+# -------------------------------------------------------
+# 5. Validar que la placa no exista
+# -------------------------------------------------------
+def convertirFecha(fecha_str):
+    """
+    Convierte una fecha string en formato DD/MM/AAAA a un objeto datetime.
+    """
+    format = "%d/%m/%Y"
+    return datetime.strptime(fecha_str, format)

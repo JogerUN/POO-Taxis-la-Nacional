@@ -5,7 +5,7 @@
 
 from modulos.vehiculo import Vehiculo
 from repositorios.vehiculo_repo import RepositorioVehiculo
-from tools.validadores import (inputObligatorio, validarFecha, validarEntero, convertirPlaca)
+from tools.validadores import (inputObligatorio, validarFecha, validarEntero, convertirPlaca, convertirFecha)
 from database.connection import crearConexion
 
 
@@ -120,6 +120,21 @@ def actualizarPolizaVehiculo():
 
     nueva_fecha_soat = validarFecha("Nueva fecha SOAT (DD/MM/AAAA): ")
     nuevo_proveedor_soat = inputObligatorio("Nuevo proveedor SOAT: ")
+
+    # Fechas actuales desde BD    
+    fecha_poliza_actual = convertirFecha(polizas["fecha_poliza"])
+    fecha_soat_actual = convertirFecha(polizas["fecha_seguro_obligatorio"])
+    
+    comparar_nueva_fecha_poliza = convertirFecha(nueva_fecha_poliza)
+    comparar_nueva_fecha_soat = convertirFecha(nueva_fecha_soat)
+    
+    if comparar_nueva_fecha_poliza <= fecha_poliza_actual:
+        print("⚠️ La nueva fecha de póliza debe ser mayor a la actual.")
+        return
+    if comparar_nueva_fecha_soat <= fecha_soat_actual:
+        print("⚠️ La nueva fecha de SOAT debe ser mayor a la actual.")
+        return
+    
 
     # Actualizar objeto en memoria
     vehiculo.actualizaPoliza(
