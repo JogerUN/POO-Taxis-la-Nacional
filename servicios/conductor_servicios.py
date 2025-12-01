@@ -1,162 +1,143 @@
-
-# servicios/conductor_servicios.py
-
+# conductor_servicios.py
+from repositorios.conductor_repo import ConductorRepo
 from modulos.conductor import Conductor
-from repositorios.conductor_repo import ConductorRepositorio
-from datetime import datetime
+from database.connection import crearConexion
 
-# ------------------------------------------------------------
-# UTILIDADES DE VALIDACIÓN
-# ------------------------------------------------------------
+connection = crearConexion()
+repo = ConductorRepo()
 
-def validar_fecha(fecha):
-    if fecha.strip() == "":
-        return ""  # permitido
-    try:
-        datetime.strptime(fecha, "%d/%m/%Y")
-        return fecha
-    except:
-        print("❌ Fecha inválida (formato DD/MM/AAAA).")
-        return None
+# Diccionarios para traducir indicadores y turnos
+ESTADOS = {1: "Activo", 2: "Candidato", 3: "Despedido"}
+TURNOS = {1: "24H", 2: "12H"}
 
-def validar_numero(texto, nombre):
-    if texto.strip() == "":
-        print(f"❌ El valor '{nombre}' no puede estar vacío.")
-        return None
-    try:
-        return float(texto)
-    except:
-        print(f"❌ '{nombre}' debe ser numérico.")
-        return None
+def registrarConductor():
+    print("\n--- REGISTRAR CONDUCTOR ---")
+    placa = input("Placa del vehículo: ").strip().upper()
+    if not repo.placaExiste(placa):
+        print(f"❌ Error: La placa '{placa}' no existe.")
+        return
 
-# ------------------------------------------------------------
-# REGISTRAR CONDUCTOR
-# ------------------------------------------------------------
-
-def registrarConductor(connection):
-    repo = ConductorRepositorio(connection)
-    print("\n--- REGISTRO DE NUEVO CONDUCTOR ---")
-
-    noId = input("Número de identificación: ").strip()
-    nombre = input("Nombre completo: ").strip()
+    noIdentificacion = input("Número de identificación: ").strip()
+    nombreCompleto = input("Nombre completo: ").strip()
     direccion = input("Dirección: ").strip()
     telefono = input("Teléfono: ").strip()
-    correo = input("Correo electrónico: ").strip()
-    placa = input("Placa del vehículo asignado: ").strip().upper()
+    correoElectronico = input("Correo electrónico: ").strip()
+    fechaIngreso = input("Fecha de ingreso (DD/MM/AAAA o vacío): ").strip() or " "
+    fechaRetiro = input("Fecha de retiro (DD/MM/AAAA o vacío): ").strip() or " "
+    indicadorContratado = int(input("Estado (1=Activo,2=Candidato,3=Despedido): ").strip() or 1)
+    turno = int(input("Turno (1=24h,2=12h): ").strip() or 1)
+    valorTurno = float(input("Valor Turno: ").strip() or 0)
+    valorAhorro = float(input("Valor Ahorro: ").strip() or 0)
+    valorAdeuda = float(input("Valor Adeuda: ").strip() or 0)
+    totalAhorradoNoDevuelto = float(input("Total no devuelto: ").strip() or 0)
 
-    # Validar placa
-    c = connection.cursor()
-    c.execute("SELECT placa FROM vehiculos WHERE placa=?", (placa,))
-    if not c.fetchone():
-        print(f"❌ Error: La placa '{placa}' no existe en la BD.")
-        return
-
-    fechaIng = validar_fecha(input("Fecha de ingreso (DD/MM/AAAA o vacío): "))
-    if fechaIng is None: return
-
-    fechaRet = validar_fecha(input("Fecha de retiro (DD/MM/AAAA o vacío): "))
-    if fechaRet is None: return
-
-    estado = input("Estado (1=Activo / 2=Candidato / 3=Despedido): ").strip()
-    while estado not in ('1','2','3'):
-        print("❌ Estado inválido. Debe ser 1, 2 o 3.")
-        estado = input("Estado (1=Activo / 2=Candidato / 3=Despedido): ").strip()
-
-    turno = input("Turno (1=24 horas / 2=12 horas): ").strip()
-    while turno not in ('1','2'):
-        print("❌ Turno inválido. Debe ser 1 o 2.")
-        turno = input("Turno (1=24 horas / 2=12 horas): ").strip()
-
-    valorTurno = validar_numero(input("Valor del turno: "), "Valor del turno")
-    if valorTurno is None: return
-
-    valorAhorro = validar_numero(input("Valor ahorro: "), "Valor ahorro")
-    if valorAhorro is None: return
-
-    valorAdeuda = validar_numero(input("Valor adeudado: "), "Valor adeudado")
-    if valorAdeuda is None: return
-
-    totalNoDev = validar_numero(input("Total no devuelto: "), "Total no devuelto")
-    if totalNoDev is None: return
-
-    # Crear objeto Conductor
     conductor = Conductor(
-        noId, nombre, direccion, telefono, correo, placa,
-        fechaIng, fechaRet, estado, turno,
-        valorTurno, valorAhorro, valorAdeuda, totalNoDev
+        noIdentificacion, nombreCompleto, direccion, telefono, correoElectronico,
+        placa, fechaIngreso, fechaRetiro, indicadorContratado, turno,
+        valorTurno, valorAhorro, valorAdeuda, totalAhorradoNoDevuelto
     )
 
-    # Guardar en BD
-    if repo.guardar(conductor):
-        print("✅ Conductor registrado correctamente.")
+    print(repo.registrar(conductor))
 
-# ------------------------------------------------------------
-# CONSULTAR CONDUCTOR
-# ------------------------------------------------------------
 
-def consultarConductor(connection):
-    repo = ConductorRepositorio(connection)
-    noId = input("ID del conductor: ").strip()
-
-    conductor = repo.buscar_por_id(noId)
-    if not conductor:
-        print("❌ No existe ese conductor.")
+def consultarConductor():
+    noId = input("Número de identificación del conductor: ").strip()
+    fila = repo.consultar(noId)
+    if not fila:
+        print("❌ No se encontró información del conductor.")
         return
 
-    # Mostrar toda la información
-    print("\n--- INFORMACIÓN DEL CONDUCTOR ---")
-    print(f"Nombre completo: {conductor.get_nombre()}")
-    print(f"ID: {conductor.get_id()}")
-    print(f"Dirección: {conductor._Conductor__direccion}")
-    print(f"Teléfono: {conductor._Conductor__telefono}")
-    print(f"Correo: {conductor._Conductor__correo}")
-    print(f"Placa asignada: {conductor.get_placa()}")
-    print(f"Fecha de ingreso: {conductor._Conductor__fechaIngreso}")
-    print(f"Fecha de retiro: {conductor._Conductor__fechaRetiro}")
-    print(f"Estado: {conductor.obtenerEstado()}")
-    print(f"Turno: {'24 horas' if conductor._Conductor__turno=='1' else '12 horas'}")
-    print(f"Valor del turno: {conductor._Conductor__valorTurno}")
-    print(f"Valor ahorro: {conductor._Conductor__valorAhorro}")
-    print(f"Valor adeudado: {conductor._Conductor__valorAdeuda}")
-    print(f"Total no devuelto: {conductor._Conductor__totalNoDevuelto}")
+    estado = ESTADOS.get(fila[8], "Desconocido")
+    turnoTexto = TURNOS.get(fila[9], "No definido")
 
-# ------------------------------------------------------------
-# ACTUALIZAR CONTACTO
-# ------------------------------------------------------------
+    print(f'''
+--- INFORMACIÓN DEL CONDUCTOR ---
+IDENTIFICACIÓN: {fila[0]}
+NOMBRE COMPLETO: {fila[1]}
+DIRECCIÓN: {fila[2]}
+TELÉFONO: {fila[3]}
+CORREO: {fila[4]}
+PLACA VEHÍCULO: {fila[5]}
+FECHA INGRESO: {fila[6]}
+FECHA RETIRO: {fila[7]}
+ESTADO: {estado}
+TURNO: {turnoTexto}
+VALOR TURNO: {fila[10]}
+VALOR AHORRO: {fila[11]}
+VALOR ADEUDA: {fila[12]}
+TOTAL NO DEVUELTO: {fila[13]}
+''')
 
-def actualizarContacto(connection):
-    repo = ConductorRepositorio(connection)
-    noId = input("ID del conductor: ").strip()
 
-    conductor = repo.buscar_por_id(noId)
-    if not conductor:
-        print("❌ No existe ese conductor.")
+def actualizarConductor():
+    noId = input("Número de identificación del conductor a actualizar: ").strip()
+    fila = repo.consultar(noId)
+    if not fila:
+        print("❌ No se encontró el conductor.")
         return
 
-    print("\n--- DATOS ACTUALES ---")
-    print("Dirección, teléfono y correo pueden actualizarse.")
+    conductor = Conductor(
+        noIdentificacion=fila[0],
+        nombreCompleto=fila[1],
+        direccion=fila[2],
+        telefono=fila[3],
+        correoElectronico=fila[4],
+        placaVehiculo=fila[5],
+        fechaIngreso=fila[6],
+        fechaRetiro=fila[7],
+        indicadorContratado=fila[8],
+        turno=fila[9],
+        valorTurno=fila[10],
+        valorAhorro=fila[11],
+        valorAdeuda=fila[12],
+        totalAhorradoNoDevuelto=fila[13]
+    )
 
-    nuevaDir = input("Nueva dirección (enter para dejar igual): ")
-    nuevoTel = input("Nuevo teléfono (enter para dejar igual): ")
-    nuevoCorreo = input("Nuevo correo (enter para dejar igual): ")
+    print(f"\nActualizando conductor: {conductor.nombreCompleto}")
+    print("Deje vacío para mantener el valor actual.\n")
 
-    conductor.actualizarContacto(nuevaDir, nuevoTel, nuevoCorreo)
-    repo.actualizar_contacto(conductor)
+    # Actualizar placa con verificación
+    nueva_placa = input(f"Placa del vehículo ({conductor.placaVehiculo}): ").strip().upper()
+    if nueva_placa:
+        if not repo.placaExiste(nueva_placa):
+            print(f"❌ Error: La placa '{nueva_placa}' no existe. No se puede actualizar.")
+            return
+        conductor.placaVehiculo = nueva_placa
 
-    print("✅ Datos actualizados.")
+    conductor.direccion = input(f"Dirección ({conductor.direccion}): ").strip() or conductor.direccion
+    conductor.telefono = input(f"Teléfono ({conductor.telefono}): ").strip() or conductor.telefono
+    conductor.correoElectronico = input(f"Correo ({conductor.correoElectronico}): ").strip() or conductor.correoElectronico
+    conductor.fechaIngreso = input(f"Fecha ingreso ({conductor.fechaIngreso}): ").strip() or conductor.fechaIngreso
+    conductor.fechaRetiro = input(f"Fecha retiro ({conductor.fechaRetiro}): ").strip() or conductor.fechaRetiro
 
-# ------------------------------------------------------------
-# LISTAR CONDUCTORES ACTIVOS
-# ------------------------------------------------------------
+    # Estado y Turno mostrando texto
+    actual_estado = ESTADOS.get(conductor.indicadorContratado, "Desconocido")
+    indicador = input(f"Estado ({actual_estado}) \n[1: Activo, 2: Candidato, 3: Despedido]: ").strip()
+    if indicador in ["1", "2", "3"]:
+        conductor.indicadorContratado = int(indicador)
 
-def listarConductoresActivos(connection):
-    repo = ConductorRepositorio(connection)
-    activos = repo.listar_activos()
+    actual_turno = TURNOS.get(conductor.turno, "Desconocido")
+    turno = input(f"Turno ({actual_turno}) \n[1: 24H, 2: 12H]: ").strip()
+    if turno in ["1", "2"]:
+        conductor.turno = int(turno)
 
+    valorAdeuda = input(f"Valor adeudado ({conductor.valorAdeuda}): ").strip()
+    conductor.valorAdeuda = float(valorAdeuda) if valorAdeuda else conductor.valorAdeuda
+    totalNoDevuelto = input(f"Total no devuelto ({conductor.totalAhorradoNoDevuelto}): ").strip()
+    conductor.totalAhorradoNoDevuelto = float(totalNoDevuelto) if totalNoDevuelto else conductor.totalAhorradoNoDevuelto
+
+    print(repo.actualizar(conductor))
+
+
+def listaConductoresActivos():
+    activos = repo.listaActivos()
     if not activos:
-        print("⚠ No hay conductores activos.")
+        print("No hay conductores activos.")
         return
 
     print("\n--- CONDUCTORES ACTIVOS ---")
+    print("Identificación | Nombre | Placa")
     for c in activos:
-        print(f"- {c.get_id()} | {c.get_nombre()} | {c.get_placa()} | Estado: {c.obtenerEstado()}")
+        print(f"{c[0]} | {c[1]} | {c[2]}")
+
+

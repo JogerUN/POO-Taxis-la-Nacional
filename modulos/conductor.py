@@ -1,116 +1,142 @@
-from datetime import datetime
-
 class Conductor:
+    def __init__(self, noIdentificacion, nombreCompleto, direccion, telefono, correoElectronico,
+                 placaVehiculo, fechaIngreso=None, fechaRetiro=None, indicadorContratado=1,
+                 turno=1, valorTurno=0, valorAhorro=0, valorAdeuda=0, totalAhorradoNoDevuelto=0):
+        self._noIdentificacion = noIdentificacion
+        self._nombreCompleto = nombreCompleto
+        self._direccion = direccion
+        self._telefono = telefono
+        self._correoElectronico = correoElectronico
+        self._placaVehiculo = placaVehiculo
+        self._fechaIngreso = fechaIngreso
+        self._fechaRetiro = fechaRetiro
+        self._indicadorContratado = indicadorContratado
+        self._turno = turno
+        self._valorTurno = valorTurno
+        self._valorAhorro = valorAhorro
+        self._valorAdeuda = valorAdeuda
+        self._totalAhorradoNoDevuelto = totalAhorradoNoDevuelto
 
-    def __init__(self, noId, nombreCompleto, direccion, telefono, correo,
-                 placaVehiculo, fechaIngreso, fechaRetiro, indicadorContratado,
-                 turno, valorTurno, valorAhorro, valorAdeuda, totalNoDevuelto):
+    # ------------------- Getters y Setters -------------------
 
-        self.__noId = noId
-        self.__nombreCompleto = nombreCompleto
-        self.__direccion = direccion
-        self.__telefono = telefono
-        self.__correo = correo
-        self.__placaVehiculo = placaVehiculo
-        self.__fechaIngreso = fechaIngreso
-        self.__fechaRetiro = fechaRetiro
-        self.__indicadorContratado = indicadorContratado
-        self.__turno = turno
-        self.__valorTurno = valorTurno
-        self.__valorAhorro = valorAhorro
-        self.__valorAdeuda = valorAdeuda
-        self.__totalNoDevuelto = totalNoDevuelto
+    @property
+    def noIdentificacion(self):
+        return self._noIdentificacion
 
-    # ---------------------------
-    # GETTERS
-    # ---------------------------
-    def get_id(self):
-        return self.__noId
+    @noIdentificacion.setter
+    def noIdentificacion(self, valor):
+        if not valor:
+            raise ValueError("La identificación no puede estar vacía")
+        self._noIdentificacion = valor
 
-    def get_nombre(self):
-        return self.__nombreCompleto
+    @property
+    def nombreCompleto(self):
+        return self._nombreCompleto
 
-    def get_direccion(self):
-        return self.__direccion
+    @nombreCompleto.setter
+    def nombreCompleto(self, valor):
+        if not valor:
+            raise ValueError("El nombre completo no puede estar vacío")
+        self._nombreCompleto = valor
 
-    def get_telefono(self):
-        return self.__telefono
+    @property
+    def direccion(self):
+        return self._direccion
 
-    def get_correo(self):
-        return self.__correo
+    @direccion.setter
+    def direccion(self, valor):
+        self._direccion = valor or ""
 
-    def get_placa(self):
-        return self.__placaVehiculo
+    @property
+    def telefono(self):
+        return self._telefono
 
-    def get_fecha_ingreso(self):
-        return self.__fechaIngreso
+    @telefono.setter
+    def telefono(self, valor):
+        self._telefono = valor or ""
 
-    def get_fecha_retiro(self):
-        return self.__fechaRetiro
+    @property
+    def correoElectronico(self):
+        return self._correoElectronico
 
-    def get_indicadorContratado(self):
-        return self.__indicadorContratado
+    @correoElectronico.setter
+    def correoElectronico(self, valor):
+        self._correoElectronico = valor or ""
 
-    def get_turno(self):
-        return self.__turno
+    @property
+    def placaVehiculo(self):
+        return self._placaVehiculo
 
-    def get_valorTurno(self):
-        return self.__valorTurno
+    @placaVehiculo.setter
+    def placaVehiculo(self, valor):
+        if not valor:
+            raise ValueError("La placa no puede estar vacía")
+        self._placaVehiculo = valor
 
-    def get_valorAhorro(self):
-        return self.__valorAhorro
+    @property
+    def fechaIngreso(self):
+        return self._fechaIngreso
 
-    def get_valorAdeuda(self):
-        return self.__valorAdeuda
+    @fechaIngreso.setter
+    def fechaIngreso(self, valor):
+        self._fechaIngreso = valor or ""
 
-    def get_totalNoDevuelto(self):
-        return self.__totalNoDevuelto
+    @property
+    def fechaRetiro(self):
+        return self._fechaRetiro
 
-    # ---------------------------
-    # SETTERS PARCIALES
-    # ---------------------------
-    def set_direccion(self, nueva):
-        self.__direccion = nueva
+    @fechaRetiro.setter
+    def fechaRetiro(self, valor):
+        self._fechaRetiro = valor or ""
 
-    def set_telefono(self, nuevo):
-        self.__telefono = nuevo
+    @property
+    def indicadorContratado(self):
+        return self._indicadorContratado
 
-    def set_correo(self, nuevo):
-        self.__correo = nuevo
+    @indicadorContratado.setter
+    def indicadorContratado(self, valor):
+        if valor not in [1, 2, 3]:
+            raise ValueError("Indicador contratado debe ser 1, 2 o 3")
+        self._indicadorContratado = valor
 
-    def set_fecha_ingreso(self, nueva):
-        self.__fechaIngreso = nueva
+    @property
+    def turno(self):
+        return self._turno
 
-    def set_fecha_retiro(self, nueva):
-        self.__fechaRetiro = nueva
+    @turno.setter
+    def turno(self, valor):
+        if valor not in [1, 2]:
+            raise ValueError("Turno debe ser 1 o 2")
+        self._turno = valor
 
-    def set_valor_adeuda(self, nuevo):
-        self.__valorAdeuda = nuevo
+    @property
+    def valorTurno(self):
+        return self._valorTurno
 
-    def set_total_no_devuelto(self, nuevo):
-        self.__totalNoDevuelto = nuevo
+    @valorTurno.setter
+    def valorTurno(self, valor):
+        self._valorTurno = float(valor or 0)
 
-    # ---------------------------
-    # POLIMORFISMO
-    # ---------------------------
-    def infConductor(self):
-        return (
-            self.__noId, self.__nombreCompleto, self.__direccion,
-            self.__telefono, self.__correo, self.__placaVehiculo,
-            self.__fechaIngreso, self.__fechaRetiro,
-            self.__indicadorContratado, self.__turno, self.__valorTurno,
-            self.__valorAhorro, self.__valorAdeuda, self.__totalNoDevuelto
-        )
+    @property
+    def valorAhorro(self):
+        return self._valorAhorro
 
-    def obtenerEstado(self):
-        estados = {1: 'Activo', 2: 'Candidato', 3: 'Despedido'}
-        try:
-            key = int(self.__indicadorContratado)
-        except:
-            return "Desconocido"
-        return estados.get(key, "Desconocido")
+    @valorAhorro.setter
+    def valorAhorro(self, valor):
+        self._valorAhorro = float(valor or 0)
 
-    def actualizarContacto(self, nuevaDir, nuevoTel, nuevoCorreo):
-        if nuevaDir: self.__direccion = nuevaDir
-        if nuevoTel: self.__telefono = nuevoTel
-        if nuevoCorreo: self.__correo = nuevoCorreo
+    @property
+    def valorAdeuda(self):
+        return self._valorAdeuda
+
+    @valorAdeuda.setter
+    def valorAdeuda(self, valor):
+        self._valorAdeuda = float(valor or 0)
+
+    @property
+    def totalAhorradoNoDevuelto(self):
+        return self._totalAhorradoNoDevuelto
+
+    @totalAhorradoNoDevuelto.setter
+    def totalAhorradoNoDevuelto(self, valor):
+        self._totalAhorradoNoDevuelto = float(valor or 0)

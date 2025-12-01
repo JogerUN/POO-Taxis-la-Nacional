@@ -1,78 +1,99 @@
-
-# ------------------------------------------------------------
-# REPOSITORIO: Acceso a la base de datos para Conductores.
-# ------------------------------------------------------------
+# conductor_repo.py
 
 import sqlite3
 from modulos.conductor import Conductor
+        
+class ConductorRepo:
+    def __init__(self):
+        self.connection = sqlite3.connect("taxis_la_nacional.db")
+        self.crearTablaConductores()
 
-class ConductorRepositorio:
+    def crearTablaConductores(self):
+        cursor = self.connection.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS conductores(
+                noIdentificacion TEXT PRIMARY KEY NOT NULL,
+                nombreCompleto TEXT NOT NULL,
+                direccion TEXT NOT NULL,
+                telefono TEXT NOT NULL,
+                correoElectronico TEXT NOT NULL,
+                placaVehiculo TEXT NOT NULL,
+                fechaIngreso TEXT,
+                fechaRetiro TEXT,
+                indicadorContratado INTEGER NOT NULL,
+                turno INTEGER NOT NULL,
+                valorTurno REAL NOT NULL,
+                valorAhorro REAL NOT NULL,
+                valorAdeuda REAL NOT NULL,
+                totalAhorradoNoDevuelto REAL NOT NULL,
+                FOREIGN KEY (placaVehiculo) REFERENCES vehiculos(placa)
+            )
+        ''')
+        self.connection.commit()
 
-    def __init__(self, connection):
-        self.conn = connection
-
-    # ------------------------------------------------------------
-    # GUARDAR (INSERTAR)
-    # ------------------------------------------------------------
-
-    def guardar(self, conductor: Conductor):
+    def placaExiste(self, placa):
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT placa FROM vehiculos WHERE placa = ?", (placa,))
+        return cursor.fetchone() is not None
+    
+    def registrar(self, conductor: Conductor):
+        cursor = self.connection.cursor()
         try:
-            cursor = self.conn.cursor()
-            cursor.execute("""
+            cursor.execute('''
                 INSERT INTO conductores VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-            """, conductor.infConductor())
-            self.conn.commit()
-            return True
+            ''', (
+                conductor.noIdentificacion,
+                conductor.nombreCompleto,
+                conductor.direccion,
+                conductor.telefono,
+                conductor.correoElectronico,
+                conductor.placaVehiculo,
+                conductor.fechaIngreso,
+                conductor.fechaRetiro,
+                conductor.indicadorContratado,
+                conductor.turno,
+                conductor.valorTurno,
+                conductor.valorAhorro,
+                conductor.valorAdeuda,
+                conductor.totalAhorradoNoDevuelto
+            ))
+            self.connection.commit()
+            return "✅ Conductor registrado correctamente."
         except sqlite3.IntegrityError:
-            print("❌ Error: Ese conductor ya existe.")
-            return False
+            return "❌ Error: Ya existe un conductor con ese número de identificación."
+        except sqlite3.Error as e:
+            return f"⚠ Error al registrar conductor: {e}"
 
-    # ------------------------------------------------------------
-    # BUSCAR POR ID
-    # ------------------------------------------------------------
-
-    def buscar_por_id(self, noId):
-        cursor = self.conn.cursor()
-        cursor.execute("SELECT * FROM conductores WHERE noIdentificacion=?", (noId,))
-        fila = cursor.fetchone()
-
-        if fila:
-            return Conductor(*fila)
-        return None
-
-    # ------------------------------------------------------------
-    # ACTUALIZAR CONTACTO
-    # ------------------------------------------------------------
-
-    def actualizar_contacto(self, conductor: Conductor):
-        cursor = self.conn.cursor()
-        cursor.execute("""
-            UPDATE conductores 
-            SET direccion=?, telefono=?, correoElectronico=?
+    def actualizar(self, conductor: Conductor):
+        cursor = self.connection.cursor()
+        cursor.execute('''
+            UPDATE conductores SET
+                placaVehiculo=?,direccion=?, telefono=?, correoElectronico=?,
+                fechaIngreso=?, fechaRetiro=?,indicadorContratado=?,turno=?,valorAdeuda=?,
+                totalAhorradoNoDevuelto=?
             WHERE noIdentificacion=?
-        """, (conductor.infConductor()[2], conductor.infConductor()[3],
-              conductor.infConductor()[4], conductor.get_id()))
-        self.conn.commit()
+        ''', (
+            conductor.placaVehiculo,
+            conductor.direccion,
+            conductor.telefono,
+            conductor.correoElectronico,
+            conductor.fechaIngreso,
+            conductor.fechaRetiro,
+            conductor.indicadorContratado,
+            conductor.turno,
+            conductor.valorAdeuda,
+            conductor.totalAhorradoNoDevuelto,
+            conductor.noIdentificacion
+        ))
+        self.connection.commit()
+        return "✅ Conductor actualizado correctamente."
 
-    # ------------------------------------------------------------
-    # ACTUALIZAR VALORES ECONÓMICOS
-    # ------------------------------------------------------------
+    def consultar(self, noIdentificacion):
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT * FROM conductores WHERE noIdentificacion=?", (noIdentificacion,))
+        return cursor.fetchone()
 
-    def actualizar_valores(self, conductor: Conductor):
-        tupla = conductor.infConductor()
-        cursor = self.conn.cursor()
-        cursor.execute("""
-            UPDATE conductores SET valorAdeuda=?, totalAhorradoNoDevuelto=?
-            WHERE noIdentificacion=?
-        """, (tupla[12], tupla[13], conductor.get_id()))
-        self.conn.commit()
-
-    # ------------------------------------------------------------
-    # LISTAR ACTIVOS
-    # ------------------------------------------------------------
-
-    def listar_activos(self):
-        cursor = self.conn.cursor()
-        cursor.execute("SELECT * FROM conductores WHERE indicadorContratado='1'")
-        filas = cursor.fetchall()
-        return [Conductor(*fila) for fila in filas]
+    def listaActivos(self):
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT noIdentificacion, nombreCompleto, placaVehiculo FROM conductores WHERE indicadorContratado=1")
+        return cursor.fetchall()
