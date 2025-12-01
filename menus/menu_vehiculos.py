@@ -1,5 +1,3 @@
-# menus/menu_vehiculos.py
-
 from menus.menu_base import Menu
 from servicios.vehiculo_servicios import (
     registrarVehiculo,

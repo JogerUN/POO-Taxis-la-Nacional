@@ -1,0 +1,2 @@
+# Requeriminetos minimos del desarrollador para ejecutar el programa
+reportlab==3.6.12

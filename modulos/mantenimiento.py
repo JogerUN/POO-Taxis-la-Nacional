@@ -13,7 +13,7 @@ class Mantenimiento:
         self.nombreProveedor = nombreProveedor
         self.descripcionServicio = descripcionServicio
         self.valorFacturado = valorFacturado
-        self.fechaServicio = fechaServicio  # Debe llegar en YYYY-MM-DD
+        self.fechaServicio = fechaServicio  # Debe llegar en DD/MM/AAAA
 
     # ===========================
     # GETTERS
@@ -90,11 +90,11 @@ class Mantenimiento:
 
     @fechaServicio.setter
     def fechaServicio(self, valor):
-        # Debe venir en formato YYYY-MM-DD
+        # Debe venir en formato DD/MM/AAAA
         try:
-            datetime.strptime(valor, "%Y-%m-%d")
+            datetime.strptime(valor, "%d/%m/%Y")
         except:
-            raise ValueError("La fecha debe estar en formato YYYY-MM-DD.")
+            raise ValueError("La fecha debe estar en formato DD/MM/AAAA.")
         self.__fechaServicio = valor
 
     # ===========================

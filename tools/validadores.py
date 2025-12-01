@@ -1,4 +1,3 @@
-# tools/validadores.py
 # ================================================================
 # VALIDADORES DE ENTRADA
 # Funciones simples que validan datos ingresados por el usuario.

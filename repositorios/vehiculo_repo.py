@@ -1,9 +1,7 @@
-# repositorios/vehiculo_repo.py
 # =============================================================
 # REPOSITORIO DE VEHÍCULOS (CRUD) Create Read Update Delete
 # Encargado de comunicación con la base de datos exclusivamente.
 # =============================================================
-
 import sqlite3
 from modulos.vehiculo import Vehiculo
 

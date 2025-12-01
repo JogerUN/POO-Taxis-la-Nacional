@@ -1,4 +1,3 @@
-# tools/crear_pdf.py
 # ===========================================================
 #  GENERADOR DE PDF PARA FICHA INTEGRADA DEL VEHÍCULO (OO)
 # ===========================================================
@@ -10,13 +9,10 @@ from datetime import datetime
 from database.connection import crearConexion
 from repositorios.vehiculo_repo import RepositorioVehiculo
 
-
 def generarFichaVehiculoPDF(placa):
     """
     Genera un PDF completo con la información del vehículo,
     el conductor asignado y el historial de mantenimientos.
-    La salida se guarda en:
-      C:\POO\Programs\TAXIS_LA_NACIONAL\output\pdfs
     """
 
     connection = crearConexion()

@@ -1,7 +1,7 @@
-# conductor_servicios.py
 from repositorios.conductor_repo import ConductorRepo
 from modulos.conductor import Conductor
 from database.connection import crearConexion
+from datetime import datetime
 
 connection = crearConexion()
 repo = ConductorRepo()
@@ -11,25 +11,85 @@ ESTADOS = {1: "Activo", 2: "Candidato", 3: "Despedido"}
 TURNOS = {1: "24H", 2: "12H"}
 
 def registrarConductor():
+    #placa
     print("\n--- REGISTRAR CONDUCTOR ---")
     placa = input("Placa del vehículo: ").strip().upper()
     if not repo.placaExiste(placa):
         print(f"❌ Error: La placa '{placa}' no existe.")
         return
+    #identificacion
+    while True:
+        noIdentificacion = input("Número de identificación: ").strip()
+        if noIdentificacion.isdigit():
+            noIdentificacion = int(noIdentificacion)
+            break
+        print("❌ Numero no valido.")
 
-    noIdentificacion = input("Número de identificación: ").strip()
     nombreCompleto = input("Nombre completo: ").strip()
     direccion = input("Dirección: ").strip()
-    telefono = input("Teléfono: ").strip()
+
+    # Teléfono
+    while True:
+        telefono = input("Teléfono: ").strip()
+        if telefono.isdigit():
+            break
+        print("❌ Solo se aceptan números enteros.")
+
     correoElectronico = input("Correo electrónico: ").strip()
-    fechaIngreso = input("Fecha de ingreso (DD/MM/AAAA o vacío): ").strip() or " "
-    fechaRetiro = input("Fecha de retiro (DD/MM/AAAA o vacío): ").strip() or " "
-    indicadorContratado = int(input("Estado (1=Activo,2=Candidato,3=Despedido): ").strip() or 1)
-    turno = int(input("Turno (1=24h,2=12h): ").strip() or 1)
-    valorTurno = float(input("Valor Turno: ").strip() or 0)
-    valorAhorro = float(input("Valor Ahorro: ").strip() or 0)
-    valorAdeuda = float(input("Valor Adeuda: ").strip() or 0)
-    totalAhorradoNoDevuelto = float(input("Total no devuelto: ").strip() or 0)
+
+    # Fecha de ingreso
+    while True:
+        fechaIngreso = input("Fecha de ingreso (DD/MM/AAAA o vacío): ").strip()
+        if fechaIngreso == "":
+            fechaIngreso = " "
+            break
+        try:
+            datetime.strptime(fechaIngreso, "%d/%m/%Y")
+            break
+        except ValueError:
+            print("❌ Formato incorrecto. Debe ser DD/MM/AAAA.")
+
+    # Fecha de retiro
+    while True:
+        fechaRetiro = input("Fecha de retiro (DD/MM/AAAA o vacío): ").strip()
+        if fechaRetiro == "":
+            fechaRetiro = " "
+            break
+        try:
+            datetime.strptime(fechaRetiro, "%d/%m/%Y")
+            break
+        except ValueError:
+            print("❌ Formato incorrecto. Debe ser DD/MM/AAAA.")
+
+    # Estado
+    while True:
+        indicadorContratado = input("Estado (1=Activo,2=Candidato,3=Despedido): ").strip()
+        if indicadorContratado in {"1","2","3"}:
+            indicadorContratado = int(indicadorContratado)
+            break
+        print("❌ Opción inválida. Debe ser 1, 2 o 3.")
+
+    # Turno
+    while True:
+        turno = input("Turno (1=24h,2=12h): ").strip()
+        if turno in {"1","2"}:
+            turno = int(turno)
+            break
+        print("❌ Opción inválida. Debe ser 1 o 2.")
+
+    # Valores numéricos
+    def pedir_numero(prompt):
+        while True:
+            valor = input(prompt).strip()
+            try:
+                return float(valor)
+            except ValueError:
+                print("❌ Solo se aceptan números.")
+
+    valorTurno = pedir_numero("Valor Turno: ")
+    valorAhorro = pedir_numero("Valor Ahorro: ")
+    valorAdeuda = pedir_numero("Valor Adeuda: ")
+    totalAhorradoNoDevuelto = pedir_numero("Total no devuelto: ")
 
     conductor = Conductor(
         noIdentificacion, nombreCompleto, direccion, telefono, correoElectronico,
@@ -105,26 +165,81 @@ def actualizarConductor():
         conductor.placaVehiculo = nueva_placa
 
     conductor.direccion = input(f"Dirección ({conductor.direccion}): ").strip() or conductor.direccion
-    conductor.telefono = input(f"Teléfono ({conductor.telefono}): ").strip() or conductor.telefono
+    
+    # Teléfono
+    while True:
+        telefono = input(f"Teléfono ({conductor.telefono}): ").strip()
+        if telefono == "":
+            break
+        if telefono.isdigit():
+            conductor.telefono = telefono
+            break
+        print("❌ Dato invalido.")
+
     conductor.correoElectronico = input(f"Correo ({conductor.correoElectronico}): ").strip() or conductor.correoElectronico
-    conductor.fechaIngreso = input(f"Fecha ingreso ({conductor.fechaIngreso}): ").strip() or conductor.fechaIngreso
-    conductor.fechaRetiro = input(f"Fecha retiro ({conductor.fechaRetiro}): ").strip() or conductor.fechaRetiro
+    
+    # Fecha de ingreso
+    while True:
+        fecha = input(f"Fecha ingreso ({conductor.fechaIngreso}): ").strip()
+        if fecha == "":
+            break
+        try:
+            datetime.strptime(fecha, "%d/%m/%Y")
+            conductor.fechaIngreso = fecha
+            break
+        except ValueError:
+            print("❌ Formato incorrecto. Debe ser DD/MM/AAAA.")
 
-    # Estado y Turno mostrando texto
-    actual_estado = ESTADOS.get(conductor.indicadorContratado, "Desconocido")
-    indicador = input(f"Estado ({actual_estado}) \n[1: Activo, 2: Candidato, 3: Despedido]: ").strip()
-    if indicador in ["1", "2", "3"]:
-        conductor.indicadorContratado = int(indicador)
+    # Fecha de retiro
+    while True:
+        fecha = input(f"Fecha retiro ({conductor.fechaRetiro}): ").strip()
+        if fecha == "":
+            break
+        try:
+            datetime.strptime(fecha, "%d/%m/%Y")
+            conductor.fechaRetiro = fecha
+            break
+        except ValueError:
+            print("❌ Formato incorrecto. Debe ser DD/MM/AAAA.")
 
-    actual_turno = TURNOS.get(conductor.turno, "Desconocido")
-    turno = input(f"Turno ({actual_turno}) \n[1: 24H, 2: 12H]: ").strip()
-    if turno in ["1", "2"]:
-        conductor.turno = int(turno)
+    # Estado
+    while True:
+        actual_estado = ESTADOS.get(conductor.indicadorContratado, "Desconocido")
+        indicador = input(f"Estado ({actual_estado}) \n[1: Activo, 2: Candidato, 3: Despedido]: ").strip()
+        if indicador == "":
+            # Dejar valor actual
+            break
+        if indicador in {"1", "2", "3"}:
+            conductor.indicadorContratado = int(indicador)
+            break
+        print("❌ Opción inválida. Debe ser 1, 2 o 3.")
 
-    valorAdeuda = input(f"Valor adeudado ({conductor.valorAdeuda}): ").strip()
-    conductor.valorAdeuda = float(valorAdeuda) if valorAdeuda else conductor.valorAdeuda
-    totalNoDevuelto = input(f"Total no devuelto ({conductor.totalAhorradoNoDevuelto}): ").strip()
-    conductor.totalAhorradoNoDevuelto = float(totalNoDevuelto) if totalNoDevuelto else conductor.totalAhorradoNoDevuelto
+# Turno
+    while True:
+        actual_turno = TURNOS.get(conductor.turno, "Desconocido")
+        turno = input(f"Turno ({actual_turno}) \n[1: 24H, 2: 12H]: ").strip()
+        if turno == "":
+            break
+        if turno in {"1", "2"}:
+            conductor.turno = int(turno)
+            break
+        print("❌ Opción inválida. Debe ser 1 o 2.")
+
+    # Valores numéricos
+    def pedir_numero(prompt, actual):
+        while True:
+            valor = input(f"{prompt} ({actual}): ").strip()
+            if valor == "":
+                return actual
+            try:
+                return float(valor)
+            except ValueError:
+                print("❌ Solo se aceptan números.")
+
+    conductor.valorTurno = pedir_numero("Valor Turno", conductor.valorTurno)
+    conductor.valorAhorro = pedir_numero("Valor Ahorro", conductor.valorAhorro)
+    conductor.valorAdeuda = pedir_numero("Valor adeudado", conductor.valorAdeuda)
+    conductor.totalAhorradoNoDevuelto = pedir_numero("Total no devuelto", conductor.totalAhorradoNoDevuelto)
 
     print(repo.actualizar(conductor))
 

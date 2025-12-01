@@ -1,0 +1,176 @@
+# 🚖 Sistema de Gestión – Taxis La Nacional  
+**Versión Orientada a Objetos (POO)**  
+Proyecto académico desarrollado en Python para la gestión integral de vehículos, conductores y mantenimientos de la empresa ficticia **Taxis La Nacional**.
+
+---
+
+## 📦 Estructura del Proyecto
+
+TAXIS_LA_NACIONAL/
+│── database/
+│ ├── connection.py
+│ └── taxis_la_nacional.db
+│
+│── menus/
+│ ├── menu_base.py
+│ ├── menu_principal.py
+│ ├── menu_vehiculos.py
+│ ├── menu_conductores.py
+│ └── menu_mantenimientos.py
+│
+│── modulos/
+│ ├── vehiculo.py
+│ ├── conductor.py
+│ └── mantenimiento.py
+│
+│── repositorios/
+│ ├── vehiculo_repo.py
+│ ├── conductor_repo.py
+│ └── mantenimiento_repo.py
+│
+│── servicios/
+│ ├── vehiculo_servicios.py
+│ ├── conductor_servicios.py
+│ └── mantenimiento_servicios.py
+│
+│── tools/
+│ ├── crear_pdf.py
+│ └── validadores.py
+│
+│── output/
+│ └── pdfs/ (Salida automática de los reportes PDF)
+│
+│── main.py
+│── README.md
+│── dev_requirements.txt
+
+
+---
+
+## 🧩 Arquitectura del Sistema
+
+El proyecto usa una arquitectura **en capas**, inspirada en Clean Architecture:
+
+### **1. Módulos (Dominio)**
+Clases que representan las entidades del negocio:
+- `Vehiculo`
+- `Conductor`
+- `Mantenimiento`
+
+### **2. Repositorios (Acceso a Datos)**
+Clases encargadas de CRUD con SQLite:
+- `vehiculo_repo.py`
+- `conductor_repo.py`
+- `mantenimiento_repo.py`
+
+### **3. Servicios (Lógica de Negocio)**
+Coordinan:
+- Entrada del usuario  
+- Validaciones  
+- Reglas de negocio  
+- Comunicación con repositorios  
+
+### **4. Menús (Interfaz de usuario de consola)**
+Menús implementados con **herencia** desde `Menu`:
+- Vehículos  
+- Conductores  
+- Mantenimientos  
+- Reportes PDF  
+
+### **5. Herramientas**
+Funciones auxiliares:
+- Validadores de entrada  
+- Generación de PDF con `reportlab`  
+
+---
+
+## 🎯 Funcionalidades Principales
+
+### 🚕 **Módulo Vehículos**
+- Registrar vehículo  
+- Consultar información completa  
+- Actualizar estado (Activo/Inactivo)  
+- Actualizar pólizas  
+- Listar vehículos activos  
+- Generar PDF del vehículo (menú principal)
+
+### 🧍 **Módulo Conductores**
+- Registrar conductor  
+- Consultar conductor  
+- Actualizar datos  
+- Listar conductores activos  
+
+### 🛠 **Módulo Mantenimientos**
+- Registrar mantenimiento  
+- Consultar mantenimiento  
+- Actualizar mantenimiento  
+- Eliminar mantenimiento  
+
+### 📄 **Reportes PDF**
+Generación automática de la **Ficha Integrada del Vehículo**, incluyendo:
+- Datos completos del vehículo  
+- Conductor asignado  
+- Historial de mantenimientos  
+
+---
+
+## 🗃 Base de Datos
+
+El archivo SQLite se genera automáticamente en:
+
+database/taxis_la_nacional.db
+
+
+Las tablas:
+- vehiculos  
+- conductores  
+- mantenimientos  
+
+Se crean si no existen.
+
+---
+
+## ▶️ Cómo ejecutar el proyecto
+
+1. Instalar dependencias:
+
+```bash
+pip install -r dev_requirements.txt
+
+python main.py
+
+📘 Dependencias Principales
+
+Python 3.10+
+
+reportlab → Generación de PDF
+
+sqlite3 → Base de datos local
+
+os / datetime / sys (biblioteca estándar)
+
+--------------------------------------------------------------------
+📄 Generación de PDF
+
+El archivo se guarda automáticamente en:
+
+/output/pdfs/Ficha_Vehiculo_<PLACA>.pdf
+
+--------------------------------------------------------------------
+👨‍💻 Autores
+
+Proyecto desarrollado por Karen, Junio, Joger como parte del módulo universitario de Programación Orientada a Objetos.
+
+--------------------------------------------------------------------
+📜 Licencia
+
+Uso académico — libre distribución con fines educativos.
+
+--------------------------------------------------------------------
+
+# ✅ **dev_requirements.txt**
+
+> **Incluye únicamente lo necesario para ejecutar el proyecto.**
+
+```txt
+reportlab==3.6.12

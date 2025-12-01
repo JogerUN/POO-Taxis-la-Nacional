@@ -22,7 +22,11 @@ class RepositorioMantenimiento:
             )
         ''')
         self.connection.commit()
-
+    def placaExiste(self, placa):
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT placa FROM vehiculos WHERE placa = ?", (placa,))
+        return cursor.fetchone() is not None
+    
     def fila_a_objeto(self, fila):
         if fila is None:
             return None

@@ -1,4 +1,3 @@
-# menus/menu_principal.py
 import sys
 from menus.menu_base import Menu
 from menus.menu_vehiculos import MenuVehiculos

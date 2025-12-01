@@ -1,4 +1,3 @@
-# servicios/vehiculo_servicios.py
 # ===========================================================
 #     LÓGICA DE NEGOCIO / CONTROLADOR DEL MÓDULO VEHÍCULOS
 # ===========================================================

@@ -1,5 +1,3 @@
-# menus/menu_base.py
-
 class Menu:
     """
     Clase base para construir menús de consola.

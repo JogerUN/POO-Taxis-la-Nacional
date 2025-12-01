@@ -1,2 +1,0 @@
-#Requirements needed to run our program 
-reportlab
