@@ -1,9 +1,8 @@
 import sqlite3
+import os
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DB_PATH = os.path.join(BASE_DIR, "database", "taxis_la_nacional.db")
 
 def crearConexion():
-    try:
-        connection = sqlite3.connect("taxis_la_nacional.db")
-        return connection
-    except sqlite3.IntegrityError as e:
-        print("Error al conectar con la base de datos:", e)
-        return None
+    return sqlite3.connect(DB_PATH)

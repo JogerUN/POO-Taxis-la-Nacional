@@ -1,5 +1,5 @@
 from menus.menu_base import Menu
-from servicios.vehiculo_servicios import (
+from servicios.old_vehiculo_servicios import (
     registrarVehiculo,
     consultarVehiculo,
     actualizarEstadoVehiculo,

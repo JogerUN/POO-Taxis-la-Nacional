@@ -6,7 +6,7 @@ import os
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from datetime import datetime
-from database.connection import crearConexion
+from database.Old_connection import crearConexion
 from repositorios.vehiculo_repo import RepositorioVehiculo
 
 def generarFichaVehiculoPDF(placa):

@@ -1,6 +1,6 @@
 from repositorios.conductor_repo import ConductorRepo
 from modulos.conductor import Conductor
-from database.connection import crearConexion
+from database.Old_connection import crearConexion
 from datetime import datetime
 
 connection = crearConexion()
