@@ -6,15 +6,18 @@ class ActualizarPolizaVehiculoWindow(BaseWindow):
 
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Actualizar Pólizas del Vehículo")
+        self.setWindowTitle("Actualizar Pólizas")
 
         layout = QFormLayout()
+        layout.setSpacing(12)
 
-        # Placa
+        titulo = QLabel("🛡️ Actualizar Pólizas del Vehículo")
+        titulo.setObjectName("titulo")
+        layout.addRow(titulo)
+
         self.placa = QLineEdit()
-        layout.addRow(QLabel("Placa:"), self.placa)
+        layout.addRow("Placa:", self.placa)
 
-        # Campos de pólizas
         self.campos = {}
         for campo, label in {
             "fecha_compra_poliza_seguro": "Fecha Póliza (DD/MM/AAAA)",
@@ -23,9 +26,9 @@ class ActualizarPolizaVehiculoWindow(BaseWindow):
             "proveedor_segObligatorio": "Proveedor SOAT"
         }.items():
             self.campos[campo] = QLineEdit()
-            layout.addRow(QLabel(label), self.campos[campo])
+            layout.addRow(label, self.campos[campo])
 
-        btn = QPushButton("Actualizar pólizas")
+        btn = QPushButton("Actualizar Pólizas")
         btn.clicked.connect(self.actualizar)
         layout.addRow(btn)
 

@@ -8,14 +8,12 @@ class RegistrarVehiculoWindow(BaseWindow):
 
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("➕ Registrar Vehículo")
-        self.setStyleSheet(self.estilos())
+        self.setWindowTitle("Registrar Vehículo")
 
         layout = QFormLayout()
         layout.setSpacing(12)
 
-        titulo = QLabel("Registro de Vehículo")
-        titulo.setAlignment(Qt.AlignCenter)
+        titulo = QLabel("➕ Registrar Nuevo Vehículo")
         titulo.setObjectName("titulo")
         layout.addRow(titulo)
 
@@ -29,7 +27,6 @@ class RegistrarVehiculoWindow(BaseWindow):
             "proveedor_segObligatorio", "activo"
         ]:
             self.campos[campo] = QLineEdit()
-            self.campos[campo].setPlaceholderText(campo.replace("_", " ").title())
             layout.addRow(campo.replace("_", " ").title(), self.campos[campo])
 
         btn = QPushButton("💾 Guardar Vehículo")
@@ -38,22 +35,6 @@ class RegistrarVehiculoWindow(BaseWindow):
 
         self.setLayout(layout)
 
-    def estilos(self):
-        return """
-        QWidget { background-color: #1e1e2f; color: white; }
-        QLabel#titulo { font-size: 18px; font-weight: bold; }
-        QLineEdit {
-            padding: 8px;
-            border-radius: 6px;
-            background-color: #2b2b3c;
-            color: white;
-        }
-        QPushButton {
-            background-color: #2d89ef;
-            padding: 10px;
-            border-radius: 8px;
-        }
-        """
 
     def guardar(self):
         try:

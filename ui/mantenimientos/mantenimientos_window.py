@@ -1,6 +1,5 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton
-from ui.vehiculos.registrar_vehiculo import RegistrarVehiculoWindow
-
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QLabel
+from PyQt5.QtCore import Qt
 class MantenimientosWindow(QWidget):
 
     def __init__(self):

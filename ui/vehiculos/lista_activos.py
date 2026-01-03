@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QLabel, QPushButton, QLineEdit, QLayout, QFormLayout
+from PyQt5.QtWidgets import QLabel, QPushButton, QLineEdit, QLayout, QFormLayout, QVBoxLayout
 from servicios.vehiculo_servicios import listaVehiculosActivos
 from ui.base_window import BaseWindow
 from PyQt5.QtWidgets import QListWidget
@@ -7,18 +7,23 @@ class ListaActivosWindow(BaseWindow):
 
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Lista de Vehículos Activos")
+        self.setWindowTitle("Vehículos Activos")
 
-        layout = QFormLayout()
-        
-        self.resultado = QListWidget()
-        
+        layout = QVBoxLayout()
+        layout.setSpacing(12)
+
+        titulo = QLabel("📋 Vehículos Activos")
+        titulo.setObjectName("titulo")
+
         btn = QPushButton("Consultar")
         btn.clicked.connect(self.consultar)
-        
-        layout.addRow(btn)
+
+        self.resultado = QListWidget()
+
+        layout.addWidget(titulo)
+        layout.addWidget(btn)
         layout.addWidget(self.resultado)
-        
+
         self.setLayout(layout)
     
     def consultar(self):

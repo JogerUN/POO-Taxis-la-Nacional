@@ -3,36 +3,32 @@ from servicios.vehiculo_servicios import consultarVehiculo
 from ui.base_window import BaseWindow
 
 class ConsultarVehiculoWindow(BaseWindow):
-    
+
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Consultar Vehículo")
 
         layout = QVBoxLayout()
-        form = QFormLayout()
-        
-        self.placa = QLineEdit()
-        self.resultado = QListWidget()
-        self.resultado.setStyleSheet("""
-        QListWidget {
-            background-color: #2b2b3c;
-            color: white;
-            border-radius: 8px;
-            padding: 6px;
-        }
-        """)
+        layout.setSpacing(12)
 
-        
-        form.addRow(QLabel("Placa:"), self.placa)
-        
+        titulo = QLabel("🔍 Consulta de Vehículo")
+        titulo.setObjectName("titulo")
+
+        form = QFormLayout()
+        self.placa = QLineEdit()
+        form.addRow("Placa:", self.placa)
+
         btn = QPushButton("Consultar")
         btn.clicked.connect(self.consultar)
-        
+
+        self.resultado = QListWidget()
+
+        layout.addWidget(titulo)
         layout.addLayout(form)
         layout.addWidget(btn)
-        layout.addWidget(self.resultado) 
-        
-        self.setLayout(layout)       
+        layout.addWidget(self.resultado)
+
+        self.setLayout(layout)     
         
     def consultar(self):
         try:
