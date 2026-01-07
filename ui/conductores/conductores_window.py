@@ -3,7 +3,7 @@ from PyQt5.QtCore import Qt
 from ui.conductores.registrar_conductor import RegistrarConductorWindow
 from ui.conductores.consultar_conductor import ConsultarConductorWindow
 from ui.conductores.actualizar_conductor import ActualizarConductorWindow
-from ui.conductores.lista_conductores_activos import ListaCondutoresActivosWindow
+from ui.conductores.lista_conductores_activos import ListaConductoresActivosWindow
 from ui.base_window import BaseWindow
 
 class ConductoresWindow(BaseWindow):
@@ -39,17 +39,17 @@ class ConductoresWindow(BaseWindow):
         self.setLayout(layout)
 
     def registrar(self):
-        self.r = RegistrarConductorWindow
+        self.r = RegistrarConductorWindow()
         self.r.show()
 
     def consultar(self):
-        self.r = ConsultarConductorWindow
+        self.r = ConsultarConductorWindow()
         self.r.show()
     
     def actualizar(self):
-        self.r = ActualizarConductorWindow
+        self.r = ActualizarConductorWindow()
         self.r.show()
         
     def lista_activos(self):
-        self.r = ListaCondutoresActivosWindow
+        self.r = ListaConductoresActivosWindow()
         self.r.show()

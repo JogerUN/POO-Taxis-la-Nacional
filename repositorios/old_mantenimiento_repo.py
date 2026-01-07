@@ -51,27 +51,19 @@ class RepositorioMantenimiento:
         return self.fila_a_objeto(fila)
 
     def actualizar(self, mantenimiento: Mantenimiento):
-        self.cursor.execute("""
+        cad = f"""
             UPDATE mantenimientos SET
-                placaVehiculo=?,
-                nitProveedor=?,
-                nombreProveedor=?,
-                descripcionServicio=?,
-                valorFacturado=?,
-                fechaServicio=?
-            WHERE numeroOrden=?
-        """, (
-            mantenimiento.placaVehiculo,
-            mantenimiento.nitProveedor,
-            mantenimiento.nombreProveedor,
-            mantenimiento.descripcionServicio,
-            mantenimiento.valorFacturado,
-            mantenimiento.fechaServicio,
-            mantenimiento.numeroOrden
-        ))
+                placaVehiculo='{mantenimiento.placaVehiculo}',
+                nitProveedor='{mantenimiento.nitProveedor}',
+                nombreProveedor='{mantenimiento.nombreProveedor}',
+                descripcionServicio='{mantenimiento.descripcionServicio}',
+                valorFacturado='{mantenimiento.valorFacturado}',
+                fechaServicio='{mantenimiento.fechaServicio}'
+            WHERE numeroOrden='{mantenimiento.numeroOrden}'
+        """
+        self.cursor.execute(cad)
         self.connection.commit()
-        
-        
+
     def borrar(self, numeroOrden):
         self.cursor.execute(
             "DELETE FROM mantenimientos WHERE numeroOrden=?",

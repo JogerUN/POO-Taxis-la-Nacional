@@ -1,27 +1,57 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QLabel
 from PyQt5.QtCore import Qt
-class MantenimientosWindow(QWidget):
+from ui.mantenimientos.registrar_mantenimiento import RegistrarMantenimientoWindow
+from ui.mantenimientos.consultar_mantenimiento import ConsultarMantenimientoWindow
+from ui.mantenimientos.actualizar_mantenimiento import ActualizarMantenimientoWindow
+from ui.mantenimientos.borrar_mantenimiento import BorrarMantenimientoWindow
+from ui.base_window import BaseWindow
+
+class MantenimientosWindow(BaseWindow):
 
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Módulo Vehículos")
+        self.setWindowTitle("Módulo Mantenimientos")
+        self.setFixedSize(840, 760)
 
         layout = QVBoxLayout()
+        layout.setSpacing(15)
+        layout.setContentsMargins(80, 60, 80, 60)
+        
+        titulo = QLabel("🛠️ Módulo Mantenimientos")
+        titulo.setObjectName("titulo")
+        titulo.setAlignment(Qt.AlignCenter)
 
-        btn_registrar = QPushButton("Registrar Vehículo")
-        btn_consultar = QPushButton("Consultar Vehículo")
-        btn_actualizar = QPushButton("Actualizar Vehículo")
-        btn_salir = QPushButton("Volver")
-
-        btn_registrar.clicked.connect(self.registrar)
-
-        layout.addWidget(btn_registrar)
-        layout.addWidget(btn_consultar)
-        layout.addWidget(btn_actualizar)
-        layout.addWidget(btn_salir)
+        layout.addWidget(titulo)
+        
+        botones = [
+            ("➕ Registrar Mantenimiento", self.registrar),
+            ("🔍 Consultar Mantenimiento", self.consultar),
+            ("♻️ Actualizar Mantenimiento", self.actualizar),
+            ("🗑️ Borrar Mantenimiento" , self.borrar),
+            ("⬅️ Volver", self.close)
+        ]        
+        
+        for texto, accion in botones:
+            btn = QPushButton(texto)
+            btn.clicked.connect(accion)
+            layout.addWidget(btn)
 
         self.setLayout(layout)
 
     def registrar(self):
-        self.r = RegistrarVehiculoWindow()
+        self.r = RegistrarMantenimientoWindow()
         self.r.show()
+        
+    def consultar(self):
+        self.r = ConsultarMantenimientoWindow()
+        self.r.show()
+        
+    def actualizar(self):
+        self.r = ActualizarMantenimientoWindow()
+        self.r.show()   
+        
+    def borrar(self):
+        self.r = BorrarMantenimientoWindow()
+        self.r.show()
+        
+        

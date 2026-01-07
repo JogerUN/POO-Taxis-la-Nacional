@@ -1,23 +1,43 @@
-class Conductor:
-    def __init__(self, noIdentificacion, nombreCompleto, direccion, telefono, correoElectronico,
-                 placaVehiculo, fechaIngreso=None, fechaRetiro=None, indicadorContratado=1,
-                 turno=1, valorTurno=0, valorAhorro=0, valorAdeuda=0, totalAhorradoNoDevuelto=0):
-        self._noIdentificacion = noIdentificacion
-        self._nombreCompleto = nombreCompleto
-        self._direccion = direccion
-        self._telefono = telefono
-        self._correoElectronico = correoElectronico
-        self._placaVehiculo = placaVehiculo
-        self._fechaIngreso = fechaIngreso
-        self._fechaRetiro = fechaRetiro
-        self._indicadorContratado = indicadorContratado
-        self._turno = turno
-        self._valorTurno = valorTurno
-        self._valorAhorro = valorAhorro
-        self._valorAdeuda = valorAdeuda
-        self._totalAhorradoNoDevuelto = totalAhorradoNoDevuelto
+# modulos/conductor.py
+from datetime import datetime
 
-    # ------------------- Getters y Setters -------------------
+
+class Conductor:
+    def __init__(
+        self,
+        noIdentificacion,
+        nombreCompleto,
+        direccion,
+        telefono,
+        correoElectronico,
+        placaVehiculo,
+        fechaIngreso="",
+        fechaRetiro="",
+        indicadorContratado=1,
+        turno=1,
+        valorTurno=0,
+        valorAhorro=0,
+        valorAdeuda=0,
+        totalAhorradoNoDevuelto=0
+    ):
+        self.noIdentificacion = noIdentificacion
+        self.nombreCompleto = nombreCompleto
+        self.direccion = direccion
+        self.telefono = telefono
+        self.correoElectronico = correoElectronico
+        self.placaVehiculo = placaVehiculo
+        self.fechaIngreso = fechaIngreso
+        self.fechaRetiro = fechaRetiro
+        self.indicadorContratado = indicadorContratado
+        self.turno = turno
+        self.valorTurno = valorTurno
+        self.valorAhorro = valorAhorro
+        self.valorAdeuda = valorAdeuda
+        self.totalAhorradoNoDevuelto = totalAhorradoNoDevuelto
+
+    # =========================
+    # VALIDACIONES (UI-FRIENDLY)
+    # =========================
 
     @property
     def noIdentificacion(self):
@@ -26,8 +46,8 @@ class Conductor:
     @noIdentificacion.setter
     def noIdentificacion(self, valor):
         if not valor:
-            raise ValueError("La identificación no puede estar vacía")
-        self._noIdentificacion = valor
+            raise ValueError("La identificación es obligatoria")
+        self._noIdentificacion = str(valor)
 
     @property
     def nombreCompleto(self):
@@ -36,8 +56,8 @@ class Conductor:
     @nombreCompleto.setter
     def nombreCompleto(self, valor):
         if not valor:
-            raise ValueError("El nombre completo no puede estar vacío")
-        self._nombreCompleto = valor
+            raise ValueError("El nombre completo es obligatorio")
+        self._nombreCompleto = valor.strip()
 
     @property
     def direccion(self):
@@ -45,7 +65,7 @@ class Conductor:
 
     @direccion.setter
     def direccion(self, valor):
-        self._direccion = valor or ""
+        self._direccion = valor.strip() if valor else ""
 
     @property
     def telefono(self):
@@ -53,6 +73,8 @@ class Conductor:
 
     @telefono.setter
     def telefono(self, valor):
+        if valor and not valor.isdigit():
+            raise ValueError("El teléfono solo debe contener números")
         self._telefono = valor or ""
 
     @property
@@ -61,7 +83,7 @@ class Conductor:
 
     @correoElectronico.setter
     def correoElectronico(self, valor):
-        self._correoElectronico = valor or ""
+        self._correoElectronico = valor.strip() if valor else ""
 
     @property
     def placaVehiculo(self):
@@ -70,8 +92,8 @@ class Conductor:
     @placaVehiculo.setter
     def placaVehiculo(self, valor):
         if not valor:
-            raise ValueError("La placa no puede estar vacía")
-        self._placaVehiculo = valor
+            raise ValueError("La placa del vehículo es obligatoria")
+        self._placaVehiculo = valor.upper()
 
     @property
     def fechaIngreso(self):
@@ -79,6 +101,11 @@ class Conductor:
 
     @fechaIngreso.setter
     def fechaIngreso(self, valor):
+        if valor:
+            try:
+                datetime.strptime(valor, "%d/%m/%Y")
+            except ValueError:
+                raise ValueError("Fecha de ingreso inválida (DD/MM/AAAA)")
         self._fechaIngreso = valor or ""
 
     @property
@@ -87,6 +114,11 @@ class Conductor:
 
     @fechaRetiro.setter
     def fechaRetiro(self, valor):
+        if valor:
+            try:
+                datetime.strptime(valor, "%d/%m/%Y")
+            except ValueError:
+                raise ValueError("Fecha de retiro inválida (DD/MM/AAAA)")
         self._fechaRetiro = valor or ""
 
     @property
@@ -95,8 +127,9 @@ class Conductor:
 
     @indicadorContratado.setter
     def indicadorContratado(self, valor):
-        if valor not in [1, 2, 3]:
-            raise ValueError("Indicador contratado debe ser 1, 2 o 3")
+        valor = int(valor)
+        if valor not in (1, 2, 3):
+            raise ValueError("Estado inválido (1=Activo, 2=Candidato, 3=Despedido)")
         self._indicadorContratado = valor
 
     @property
@@ -105,8 +138,9 @@ class Conductor:
 
     @turno.setter
     def turno(self, valor):
-        if valor not in [1, 2]:
-            raise ValueError("Turno debe ser 1 o 2")
+        valor = int(valor)
+        if valor not in (1, 2):
+            raise ValueError("Turno inválido (1=24H, 2=12H)")
         self._turno = valor
 
     @property
@@ -140,3 +174,25 @@ class Conductor:
     @totalAhorradoNoDevuelto.setter
     def totalAhorradoNoDevuelto(self, valor):
         self._totalAhorradoNoDevuelto = float(valor or 0)
+
+    # =========================
+    # UTILIDAD PARA UI / REPO
+    # =========================
+
+    def como_tupla(self):
+        return (
+            self.noIdentificacion,
+            self.nombreCompleto,
+            self.direccion,
+            self.telefono,
+            self.correoElectronico,
+            self.placaVehiculo,
+            self.fechaIngreso,
+            self.fechaRetiro,
+            self.indicadorContratado,
+            self.turno,
+            self.valorTurno,
+            self.valorAhorro,
+            self.valorAdeuda,
+            self.totalAhorradoNoDevuelto
+        )
